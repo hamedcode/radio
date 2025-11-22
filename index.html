@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -6,46 +7,51 @@
   <style>
     :root{--bg:#121212;--card:#1d1d1d;--accent:#00ffa6;--text:#eee}
     body{margin:0;font-family:sans-serif;direction:rtl;background:var(--bg);color:var(--text)}
-    .header{padding:18px;text-align:center;background:#151515;font-size:22px}/* دو ستون */
-.cols{display:flex;gap:18px;padding:16px;box-sizing:border-box}
-.col{flex:1;background:transparent}
-.col .category{padding:10px 14px;font-size:18px;background:#212121;border-radius:8px;margin-bottom:10px}
+    .header{padding:18px;text-align:center;background:#151515;font-size:22px}
 
-.station-list{display:flex;flex-direction:column;gap:10px}
-.station{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:10px;border-radius:10px;cursor:pointer}
-.station:hover{background:#2a2a2a}
-.station .left{display:flex;align-items:center;gap:10px}
-.station img{width:44px;height:44px;border-radius:6px;object-fit:cover}
-.station .meta{display:flex;flex-direction:column;text-align:right}
-.station button{background:var(--accent);border:none;color:#000;padding:8px 10px;border-radius:8px;cursor:pointer}
+    /* دو ستون */
+    .cols{display:flex;gap:18px;padding:16px;box-sizing:border-box}
+    .col{flex:1;background:transparent}
+    .col .category{padding:10px 14px;font-size:18px;background:#212121;border-radius:8px;margin-bottom:10px}
 
-/* fixed simple player bottom */
-.player-box{position:fixed;bottom:0;left:0;right:0;background:#181818;border-top:3px solid var(--accent);padding:10px 14px;display:flex;align-items:center;gap:12px;z-index:100}
-.player-title{flex:1;font-size:16px}
-.vol{width:140px}
+    .station-list{display:flex;flex-direction:column;gap:10px}
+    .station{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:10px;border-radius:10px;cursor:pointer}
+    .station:hover{background:#2a2a2a}
+    .station .left{display:flex;align-items:center;gap:10px}
+    .station img{width:44px;height:44px;border-radius:6px;object-fit:cover}
+    .station .meta{display:flex;flex-direction:column;text-align:right}
+    .station button{background:var(--accent);border:none;color:#000;padding:8px 10px;border-radius:8px;cursor:pointer}
 
-/* equalizer canvas */
-#eq{width:100%;height:64px;display:block;background:#000;margin-top:10px}
+    /* پلیر ثابت پایین */
+    .player-box{position:fixed;bottom:0;left:0;right:0;background:#181818;border-top:3px solid var(--accent);padding:10px 14px;display:flex;align-items:center;gap:12px;z-index:100}
+    .player-title{flex:1;font-size:16px}
+    .vol{width:140px}
 
-/* responsive */
-@media(max-width:800px){
-  .cols{flex-direction:column}
-}
+    /* اکولایزر ثابت زیر پلیر */
+    #eq{position:fixed;bottom:70px;left:0;right:0;width:100%;height:64px;display:block;background:#000;z-index:90}
 
+    @media(max-width:800px){ .cols{flex-direction:column} }
   </style>
 </head>
-<body>  <div class="header">🎧 رادیو آنلاین</div>  <div class="cols">
-    <!-- left column: Turk/Azeri -->
-    <div class="col" id="col_tr">
+<body>
+  <div class="header">🎧 رادیو آنلاین</div>
+
+  <div class="cols">
+    <!-- ستون چپ: ترکی/آذری -->
+    <div class="col">
       <div class="category">📌 ترکی و آذری</div>
       <div class="station-list" id="cat_tr"></div>
-    </div><!-- right column: Persian -->
-<div class="col" id="col_fa">
-  <div class="category">📌 فارسی</div>
-  <div class="station-list" id="cat_fa"></div>
-</div>
+    </div>
 
-  </div>  <!-- fixed simple player (name + single play/pause handled per-station) -->  <div class="player-box">
+    <!-- ستون راست: فارسی -->
+    <div class="col">
+      <div class="category">📌 فارسی</div>
+      <div class="station-list" id="cat_fa"></div>
+    </div>
+  </div>
+
+  <!-- پلیر پایین -->
+  <div class="player-box">
     <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
     <div>
       حجم: <input class="vol" id="volume" type="range" min="0" max="1" step="0.01" value="1">
@@ -53,13 +59,14 @@
     <div>
       <button id="stopBtn">⏹ توقف</button>
     </div>
-  </div>  <!-- bottom equalizer --><canvas id="eq"></canvas>
+  </div>
+
+  <!-- اکولایزر -->
+  <canvas id="eq"></canvas>
 
   <script>
-    // لیست ایستگاه‌ها
+    // ===== لیست ایستگاه‌ها (اسم + استریم + عکس + زبان) =====
     const stations = [
-      // Persian
-      { name: "Radio Sedaye Khiaban", url: "https://stream-177.zeno.fm/1nyiz8ma60hvv", lang: "fa", logo: "" },
       { name: "Radio Shadi", url: "https://ice9.securenetsystems.net/SHADI", lang: "fa", logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/NRIGBcOzqWFUZZ4dhVZ3bp6oKMftJTpniyrmgru7dZM/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvOGUyZDcwMjUtMmZhMC00MDU5LWFmNGMtMDg0ZjA1NmZjOTk4L2ltYWdlLz91PTE3MDE2OTc1OTEwMDA.webp" },
       { name: "Radio Avang Klap", url: "https://stream.zeno.fm/fpabqr8pd9zuv", lang: "fa", logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/acnY7ntKys9h-2AhQvRWpVDUV0WY3Kh-Jfb8rkjNuH4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvNTBmMmVlYjAtNzVkOC00YTllLTlkNWYtZjY1YjkwYjk3MDQ2L2ltYWdlLz91PTE3MzY4NDYwMzEwMDA.webp" },
       { name: "Radio Bamdad", url: "https://stream.zeno.fm/16gxgv7ch5zuv", lang: "fa", logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/RI7ZbLc36B1wt2hmlyMxSBwXpETbKBuvcd6coiCjGds/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ1FvLTdyMGdvTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ1E0OGEwaUFnTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY2MDgzMzA4MjAwMA.webp" },
@@ -103,6 +110,8 @@
       // logo اختیاری
       if(st.logo){
         const img = document.createElement('img'); img.src = st.logo; img.alt='logo';
+        // اگر تصویر لود نشد، مخفی کن
+        img.onerror = () => { img.style.display = 'none'; };
         left.appendChild(img);
       }
       left.appendChild(meta);
@@ -188,8 +197,26 @@
       eqCtx.fillRect(0,0,eq.width,eq.height);
       const barWidth = (eq.width / bufferLength) * 2.5;
       let x = 0;
+
+      // پارامترهایی برای طبیعی‌تر و کمتر فول ماندن ستون‌ها
+      const DAMP = 0.45;      // مقیاس اصلی (کمتر از 1)
+      const NOISE_MAX = 12;   // نویز رندوم اضافه‌شونده
+      const MAX_BAR = eq.height - 6; // بیشینه منطقی برای هر ستون
+
       for(let i=0;i<bufferLength;i++){
-        const v = dataArray[i]/2;
+        // مقدار خام
+        let v = dataArray[i];
+
+        // اعمال دامپ (کاهش کلی)
+        v = v * DAMP;
+
+        // افزودن نویز کوچک برای تغییرات جزئی و طبیعی‌تر شدن
+        v += Math.random() * NOISE_MAX;
+
+        // محدودسازی به ارتفاع اکولایزر
+        if(v > MAX_BAR) v = MAX_BAR;
+
+        // رسم ستون
         eqCtx.fillStyle = '#00ffa6';
         eqCtx.fillRect(x, eq.height - v, barWidth, v);
         x += barWidth + 1;
@@ -200,5 +227,6 @@
     // هنگام اولین پخش AudioContext را فعال کن
     audio.addEventListener('play', ()=>{ try{ ensureAudioContext(); }catch(e){console.warn(e);} });
 
-  </script></body>
+  </script>
+</body>
 </html>
