@@ -1,179 +1,266 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-<meta charset="UTF-8">
-<title>رادیو آنلاین</title>
-<style>
+  <meta charset="UTF-8" />
+  <title>رادیو آنلاین</title>
+  <style>
     body {
-        margin: 0;
-        background: #121212;
-        font-family: sans-serif;
-        direction: rtl;
-        color: white;
-        text-align: center;
+      margin: 0;
+      font-family: sans-serif;
+      direction: rtl;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .dark {
+      background: #121212;
+      color: white;
+    }
+    .light {
+      background: #f4f4f4;
+      color: #333;
     }
 
     .header {
-        background: #1f1f1f;
-        padding: 20px;
-        font-size: 22px;
-        font-weight: bold;
-        box-shadow: 0 2px 10px #000a;
+      padding: 20px;
+      font-size: 24px;
+      text-align: center;
+      background: #1f1f1f;
+      color: white;
+    }
+    .light .header {
+      background: #ddd;
+      color: #333;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 10px;
+    }
+    .top-bar button {
+      cursor: pointer;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      transition: background-color 0.2s;
+    }
+
+    .top-bar input {
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      font-size: 16px;
     }
 
     .station-list {
-        margin: 20px auto;
-        max-width: 450px;
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 0 10px;
     }
 
     .station {
-        background: #1c1c1c;
-        margin: 12px 0;
-        padding: 14px;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: 0.2s;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 17px;
+      display: flex;
+      align-items: center;
+      background: rgba(0,0,0,0.1);
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-
+    .light .station {
+      background: rgba(0,0,0,0.05);
+    }
     .station:hover {
-        background: #272727;
+      background: rgba(0,0,0,0.2);
     }
 
+    .station img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-left: 12px;
+      object-fit: cover;
+    }
+
+    .station .info {
+      flex: 1;
+      text-align: right;
+    }
+
+    .play-icon, .stop-icon {
+      width: 20px;
+      height: 20px;
+      margin-left: 12px;
+    }
     .play-icon {
-        width: 18px;
-        height: 18px;
-        border-left: 12px solid white;
-        border-top: 8px solid transparent;
-        border-bottom: 8px solid transparent;
+      border-left: 14px solid currentColor;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
     }
-
     .stop-icon {
-        width: 14px;
-        height: 14px;
-        background: white;
+      background: currentColor;
     }
 
     audio {
-        display: none;
+      display: none;
     }
-</style>
+  </style>
 </head>
-<body>
+<body class="dark">
 
-<div class="header">🎧 رادیو آنلاین</div>
+  <div class="header">🎧 رادیو آنلاین</div>
 
-<div class="station-list">
+  <div class="top-bar">
+    <button onclick="toggleTheme()">تغییر تم</button>
+    <input type="text" id="search" placeholder="جستجوی رادیو..." oninput="filterStations()" />
+  </div>
 
-    <div class="station" onclick="playRadio('https://stream-177.zeno.fm/1nyiz8ma60hvv', this)">
-        <span>Radio Sedaye Khiaban</span>
-        <div class="play-icon"></div>
-    </div>
+  <div class="station-list" id="stationList"></div>
 
-    <div class="station" onclick="playRadio('https://ice9.securenetsystems.net/SHADI', this)">
-        <span>Radio Shadi</span>
-        <div class="play-icon"></div>
-    </div>
+  <audio id="player" controls></audio>
 
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/fpabqr8pd9zuv', this)">
-        <span>Radio Avang Klap</span>
-        <div class="play-icon"></div>
-    </div>
+  <script>
+    const stations = [
+      {
+        name: "Radio Sedaye Khiaban",
+        url: "https://stream-177.zeno.fm/1nyiz8ma60hvv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/1nyiz8ma60hvv.webp"
+      },
+      {
+        name: "Radio Shadi",
+        url: "https://ice9.securenetsystems.net/SHADI",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/SHADI.webp"
+      },
+      {
+        name: "Radio Avang Klap",
+        url: "https://stream.zeno.fm/fpabqr8pd9zuv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/fpabqr8pd9zuv.webp"
+      },
+      {
+        name: "Radio Bamdad",
+        url: "https://stream.zeno.fm/16gxgv7ch5zuv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/16gxgv7ch5zuv.webp"
+      },
+      {
+        name: "Radio Simorgh",
+        url: "https://stream.zeno.fm/9svfnobkrxrvv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/9svfnobkrxrvv.webp"
+      },
+      {
+        name: "Radio Hamrah",
+        url: "https://stream.zeno.fm/euutwhsru2wtv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/euutwhsru2wtv.webp"
+      },
+      {
+        name: "Radio Yar",
+        url: "https://stream.zeno.fm/oyb5oh6ne3tuv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/oyb5oh6ne3tuv.webp"
+      },
+      {
+        name: "Radio Yar Plus",
+        url: "https://stream.zeno.fm/2jwyo983y49vv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/2jwyo983y49vv.webp"
+      },
+      {
+        name: "KIRN 670 AM LA",
+        url: "https://stream.zeno.fm/wyth8w2r3heuv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/wyth8w2r3heuv.webp"
+      },
+      {
+        name: "Radio Farsi London",
+        url: "https://stream.zeno.fm/c3kkavhhzd0uv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/c3kkavhhzd0uv.webp"
+      },
+      {
+        name: "Arabesk Efsane FM",
+        url: "https://stream.zeno.fm/x5n4sfyy9nhvv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/x5n4sfyy9nhvv.webp"
+      },
+      {
+        name: "Radyo Nostalji Sesi",
+        url: "https://stream.zeno.fm/q7zxyx2qsfhvv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/q7zxyx2qsfhvv.webp"
+      },
+      {
+        name: "Radio Veten",
+        url: "https://stream.zeno.fm/0kgkkzanmueuv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/8g8PctmUYIp-MsAb60n1yzr6UB2mIagYYh9OFcI8AO4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJREFwdENqdkFzTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0FnSUR5aUFvTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY3NDE5MDEyNzAwMA.webp"
+      },
+      {
+        name: "İznik FM",
+        url: "https://stream.zeno.fm/4crdx4nukrnuv",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/4crdx4nukrnuv.webp"
+      },
+      {
+        name: "Naxçıvan Radiosu",
+        url: "http://s33.myradiostream.com:12782/listen.mp3",
+        logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/…/default-station.webp"
+      }
+    ];
 
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/16gxgv7ch5zuv', this)">
-        <span>Radio Bamdad</span>
-        <div class="play-icon"></div>
-    </div>
+    const stationListEl = document.getElementById("stationList");
+    const player = document.getElementById("player");
+    let currentStation = null;
 
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/9svfnobkrxrvv', this)">
-        <span>Radio Simorgh</span>
-        <div class="play-icon"></div>
-    </div>
+    function renderStations(list) {
+      stationListEl.innerHTML = "";
+      list.forEach(st => {
+        const div = document.createElement("div");
+        div.className = "station";
+        div.onclick = () => playRadio(st, div);
 
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/euutwhsru2wtv', this)">
-        <span>Radio Hamrah</span>
-        <div class="play-icon"></div>
-    </div>
+        const img = document.createElement("img");
+        img.src = st.logo;
+        img.onerror = () => { img.src = "https://zeno.fm/images/default-station.png"; };
 
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/oyb5oh6ne3tuv', this)">
-        <span>Radio Yar</span>
-        <div class="play-icon"></div>
-    </div>
+        const info = document.createElement("div");
+        info.className = "info";
+        info.textContent = st.name;
 
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/2jwyo983y49vv', this)">
-        <span>Radio Yar Plus</span>
-        <div class="play-icon"></div>
-    </div>
+        const icon = document.createElement("div");
+        icon.className = "play-icon";
 
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/wyth8w2r3heuv', this)">
-        <span>KIRN 670 AM LA</span>
-        <div class="play-icon"></div>
-    </div>
+        div.appendChild(img);
+        div.appendChild(info);
+        div.appendChild(icon);
+        stationListEl.appendChild(div);
+      });
+    }
 
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/c3kkavhhzd0uv', this)">
-        <span>Radio Farsi London</span>
-        <div class="play-icon"></div>
-    </div>
-
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/x5n4sfyy9nhvv', this)">
-        <span>Arabesk Efsane FM</span>
-        <div class="play-icon"></div>
-    </div>
-
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/q7zxyx2qsfhvv', this)">
-        <span>Radyo Nostalji Sesi</span>
-        <div class="play-icon"></div>
-    </div>
-
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/0kgkkzanmueuv', this)">
-        <span>Radio Veten</span>
-        <div class="play-icon"></div>
-    </div>
-
-    <div class="station" onclick="playRadio('https://stream.zeno.fm/4crdx4nukrnuv', this)">
-        <span>İznik FM</span>
-        <div class="play-icon"></div>
-    </div>
-
-    <div class="station" onclick="playRadio('http://s33.myradiostream.com:12782/listen.mp3', this)">
-        <span>Naxçıvan Radiosu</span>
-        <div class="play-icon"></div>
-    </div>
-
-</div>
-
-<audio id="player" controls></audio>
-
-<script>
-let currentStation = null;
-
-function playRadio(url, element) {
-    let player = document.getElementById("player");
-
-    // اگر دوباره روی همان کلیک شد → توقف
-    if (currentStation === element) {
+    function playRadio(station, element) {
+      if (currentStation === element) {
         player.pause();
         player.src = "";
-        element.querySelector("div").className = "play-icon";
+        element.querySelector("div:last-child").className = "play-icon";
         currentStation = null;
         return;
+      }
+      if (currentStation) {
+        currentStation.querySelector("div:last-child").className = "play-icon";
+      }
+      currentStation = element;
+      player.src = station.url;
+      player.play();
+      element.querySelector("div:last-child").className = "stop-icon";
     }
 
-    // توقف قبلی
-    if (currentStation) {
-        currentStation.querySelector("div").className = "play-icon";
+    function toggleTheme() {
+      document.body.classList.toggle("dark");
+      document.body.classList.toggle("light");
     }
 
-    // پخش جدید
-    currentStation = element;
-    player.src = url;
-    player.play();
-    element.querySelector("div").className = "stop-icon";
-}
-</script>
+    function filterStations() {
+      const q = document.getElementById("search").value.toLowerCase();
+      const filtered = stations.filter(st => st.name.toLowerCase().includes(q));
+      renderStations(filtered);
+    }
+
+    // اولین رندر ایستگاه‌ها
+    renderStations(stations);
+
+  </script>
 
 </body>
 </html>
