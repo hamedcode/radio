@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>رادیو آنلاین</title>
+<style>
+    body {
+        font-family: sans-serif;
+        direction: rtl;
+        background: #f4f4f4;
+        padding: 30px;
+        text-align: center;
+    }
+    .radio-list {
+        margin: 20px auto;
+        max-width: 300px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #ccc;
+    }
+    button {
+        width: 100%;
+        margin: 6px 0;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        background: #2196F3;
+        color: #fff;
+    }
+    button:hover {
+        background: #0b7dda;
+    }
+</style>
+</head>
+<body>
+
+<h2>🎧 پخش زنده رادیو</h2>
+
+<audio id="player" controls style="width:90%; margin-top:20px;">
+    مرورگر شما از پخش آنلاین پشتیبانی نمی‌کند.
+</audio>
+
+<div class="radio-list">
+    <button onclick="playRadio('91.107.251.50:8000/radio-70s-azeri-music-glwiz')">رادیو شماره ۱</button>
+    <button onclick="playRadio('https://your-radio-link-2/stream')">رادیو شماره ۲</button>
+    <button onclick="playRadio('https://your-radio-link-3/stream')">رادیو شماره ۳</button>
+</div>
+
+<script>
+function playRadio(url) {
+    let player = document.getElementById("player");
+    player.src = url;
+    player.play();
+}
+</script>
+
+</body>
+</html>
