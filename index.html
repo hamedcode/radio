@@ -1,147 +1,204 @@
 <!DOCTYPE html><html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <title>Online Radio Player</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>رادیو آنلاین</title>
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      direction: rtl;
-      background: #121212;
-      color: #eee;
-    }
-    .header {
-      padding: 20px;
-      font-size: 26px;
-      text-align: center;
-      background: #1f1f1f;
-    }
-    .category {
-      padding: 14px 20px;
-      font-size: 20px;
-      background: #222;
-      margin-top: 20px;
-      border-right: 5px solid #00ffa6;
-    }.station-list {
-  padding: 10px 20px;
-}
+    :root{--bg:#121212;--card:#1d1d1d;--accent:#00ffa6;--text:#eee}
+    body{margin:0;font-family:sans-serif;direction:rtl;background:var(--bg);color:var(--text)}
+    .header{padding:18px;text-align:center;background:#151515;font-size:22px}/* دو ستون */
+.cols{display:flex;gap:18px;padding:16px;box-sizing:border-box}
+.col{flex:1;background:transparent}
+.col .category{padding:10px 14px;font-size:18px;background:#212121;border-radius:8px;margin-bottom:10px}
 
-.station {
-  display: flex;
-  align-items: center;
-  background: #1d1d1d;
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.station:hover {
-  background: #333;
-}
+.station-list{display:flex;flex-direction:column;gap:10px}
+.station{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:10px;border-radius:10px;cursor:pointer}
+.station:hover{background:#2a2a2a}
+.station .left{display:flex;align-items:center;gap:10px}
+.station img{width:44px;height:44px;border-radius:6px;object-fit:cover}
+.station .meta{display:flex;flex-direction:column;text-align:right}
+.station button{background:var(--accent);border:none;color:#000;padding:8px 10px;border-radius:8px;cursor:pointer}
 
-.station img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-left: 12px;
-  object-fit: cover;
-}
+/* fixed simple player bottom */
+.player-box{position:fixed;bottom:0;left:0;right:0;background:#181818;border-top:3px solid var(--accent);padding:10px 14px;display:flex;align-items:center;gap:12px;z-index:100}
+.player-title{flex:1;font-size:16px}
+.vol{width:140px}
 
-/* PLAYER */
-.player-box {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #181818;
-  border-top: 2px solid #00ffa6;
-  padding: 14px;
-}
-.player-title {
-  font-size: 18px;
-  margin-bottom: 6px;
-}
+/* equalizer canvas */
+#eq{width:100%;height:64px;display:block;background:#000;margin-top:10px}
 
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-button {
-  background: #00ffa6;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.visualizer {
-  width: 100%;
-  height: 50px;
-  background: #000;
-  margin-top: 10px;
+/* responsive */
+@media(max-width:800px){
+  .cols{flex-direction:column}
 }
 
   </style>
 </head>
-<body>  <div class="header">🎧 رادیو آنلاین</div>  <!-- CATEGORY: Persian -->  <div class="cols" style="display:flex; gap:20px; padding:20px;">
-  <div style="flex:1; order:2;"> <!-- Persian column (right) -->
-    <div class="category">📌 فارسی</div>
-  <div class="station-list" id="cat_fa"></div>  <!-- CATEGORY: Turk / Azeri --></div>
-
-  <div style="flex:1; order:1;"> <!-- Turk/Azeri column (left) -->
-    <div class="category">📌 ترکی و آذری</div>
-  <div class="station-list" id="cat_tr"></div>  <!-- PLAYER --></div>
-
-</div>  <div class="player-box" style="position:fixed;bottom:0;left:0;right:0;background:#181818;border-top:2px solid #00ffa6;padding:14px;display:flex;justify-content:space-between;align-items:center;">
-  <div id="nowPlaying" style="font-size:18px;">هیچ رادیویی انتخاب نشده</div>
-  <button onclick="togglePlay()">▶️/⏸️</button>
+<body>  <div class="header">🎧 رادیو آنلاین</div>  <div class="cols">
+    <!-- left column: Turk/Azeri -->
+    <div class="col" id="col_tr">
+      <div class="category">📌 ترکی و آذری</div>
+      <div class="station-list" id="cat_tr"></div>
+    </div><!-- right column: Persian -->
+<div class="col" id="col_fa">
+  <div class="category">📌 فارسی</div>
+  <div class="station-list" id="cat_fa"></div>
 </div>
-<!-- Bottom Equalizer -->
-  <canvas id="eq" style="width:100%; height:60px; background:#000; margin-top:20px;"></canvas>  <script>
-    const stations = [
-      // ======== Persian ========
-      { name: "Radio Sedaye Khiaban", url: "https://stream-177.zeno.fm/1nyiz8ma60hvv", lang: "fa" },
-      { name: "Radio Shadi", url: "https://ice9.securenetsystems.net/SHADI", lang: "fa" },
-      { name: "Radio Avang Klap", url: "https://stream.zeno.fm/fpabqr8pd9zuv", lang: "fa" },
-      { name: "Radio Bamdad", url: "https://stream.zeno.fm/16gxgv7ch5zuv", lang: "fa" },
-      { name: "Radio Simorgh", url: "https://stream.zeno.fm/9svfnobkrxrvv", lang: "fa" },
-      { name: "Radio Hamrah", url: "https://stream.zeno.fm/euutwhsru2wtv", lang: "fa" },
-      { name: "Radio Yar", url: "https://stream.zeno.fm/oyb5oh6ne3tuv", lang: "fa" },
-      { name: "Radio Yar Plus", url: "https://stream.zeno.fm/2jwyo983y49vv", lang: "fa" },
-      { name: "KIRN 670 AM", url: "https://stream.zeno.fm/wyth8w2r3heuv", lang: "fa" },
-      { name: "Radio Farsi London", url: "https://stream.zeno.fm/c3kkavhhzd0uv", lang: "fa" },
 
-      // ======== Turk / Azeri ========
-      { name: "Arabesk Efsane FM", url: "https://stream.zeno.fm/x5n4sfyy9nhvv", lang: "tr" },
-      { name: "Radyo Nostalji", url: "https://stream.zeno.fm/q7zxyx2qsfhvv", lang: "tr" },
-      { name: "Radio Veten", url: "https://stream.zeno.fm/0kgkkzanmueuv", lang: "tr" },
-      { name: "İznik FM", url: "https://stream.zeno.fm/4crdx4nukrnuv", lang: "tr" },
-      { name: "Naxçıvan Radiosu", url: "http://s33.myradiostream.com:12782/listen.mp3", lang: "tr" }
+  </div>  <!-- fixed simple player (name + single play/pause handled per-station) -->  <div class="player-box">
+    <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
+    <div>
+      حجم: <input class="vol" id="volume" type="range" min="0" max="1" step="0.01" value="1">
+    </div>
+    <div>
+      <button id="stopBtn">⏹ توقف</button>
+    </div>
+  </div>  <!-- bottom equalizer --><canvas id="eq"></canvas>
+
+  <script>
+    // لیست ایستگاه‌ها
+    const stations = [
+      // Persian
+      { name: "Radio Sedaye Khiaban", url: "https://stream-177.zeno.fm/1nyiz8ma60hvv", lang: "fa", logo: "" },
+      { name: "Radio Shadi", url: "https://ice9.securenetsystems.net/SHADI", lang: "fa", logo: "" },
+      { name: "Radio Avang Klap", url: "https://stream.zeno.fm/fpabqr8pd9zuv", lang: "fa", logo: "" },
+      { name: "Radio Bamdad", url: "https://stream.zeno.fm/16gxgv7ch5zuv", lang: "fa", logo: "" },
+      { name: "Radio Simorgh", url: "https://stream.zeno.fm/9svfnobkrxrvv", lang: "fa", logo: "" },
+      { name: "Radio Hamrah", url: "https://stream.zeno.fm/euutwhsru2wtv", lang: "fa", logo: "" },
+      { name: "Radio Yar", url: "https://stream.zeno.fm/oyb5oh6ne3tuv", lang: "fa", logo: "" },
+      { name: "Radio Yar Plus", url: "https://stream.zeno.fm/2jwyo983y49vv", lang: "fa", logo: "" },
+      { name: "KIRN 670 AM", url: "https://stream.zeno.fm/wyth8w2r3heuv", lang: "fa", logo: "" },
+      { name: "Radio Farsi London", url: "https://stream.zeno.fm/c3kkavhhzd0uv", lang: "fa", logo: "" },
+
+      // Turk/Azeri
+      { name: "Arabesk Efsane FM", url: "https://stream.zeno.fm/x5n4sfyy9nhvv", lang: "tr", logo: "" },
+      { name: "Radyo Nostalji", url: "https://stream.zeno.fm/q7zxyx2qsfhvv", lang: "tr", logo: "" },
+      { name: "Radio Veten", url: "https://stream.zeno.fm/0kgkkzanmueuv", lang: "tr", logo: "https://zeno.fm/_ipx/_/https://images.zeno.fm/8g8PctmUYIp-MsAb60n1yzr6UB2mIagYYh9OFcI8AO4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJREFwdENqdkFzTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0FnSUR5aUFvTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY3NDE5MDEyNzAwMA.webp" },
+      { name: "İznik FM", url: "https://stream.zeno.fm/4crdx4nukrnuv", lang: "tr", logo: "" },
+      { name: "Naxçıvan Radiosu", url: "http://s33.myradiostream.com:12782/listen.mp3", lang: "tr", logo: "" }
     ];
 
-    const cat_fa = document.getElementById("cat_fa");
-    const cat_tr = document.getElementById("cat_tr");
-    let currentUrl = null;
-const nowPlaying = document.getElementById('nowPlaying');
-const audio = new Audio();
-let isPlaying = false;
+    // المان‌ها
+    const cat_fa = document.getElementById('cat_fa');
+    const cat_tr = document.getElementById('cat_tr');
+    const nowPlaying = document.getElementById('nowPlaying');
+    const volume = document.getElementById('volume');
+    const stopBtn = document.getElementById('stopBtn');
 
-function playStation(st){
-  currentUrl = st.url;
-  audio.src = st.url;
-  audio.play();
-  isPlaying = true;
-  nowPlaying.textContent = "در حال پخش: " + st.name;
-}
+    // audio single instance
+    const audio = new Audio();
+    audio.crossOrigin = "anonymous";
+    audio.volume = parseFloat(volume.value);
 
-function togglePlay(){
-  if(!currentUrl) return;
-  if(isPlaying){ audio.pause(); isPlaying=false; }
-  else{ audio.play(); isPlaying=true; }
-}
+    // پر کردن لیست‌ها
+    function makeStationElement(st){
+      const el = document.createElement('div');
+      el.className = 'station';
+
+      const left = document.createElement('div'); left.className='left';
+      const meta = document.createElement('div'); meta.className='meta';
+      const title = document.createElement('div'); title.textContent = st.name;
+      meta.appendChild(title);
+
+      // logo اختیاری
+      if(st.logo){
+        const img = document.createElement('img'); img.src = st.logo; img.alt='logo';
+        left.appendChild(img);
+      }
+      left.appendChild(meta);
+
+      const btn = document.createElement('button');
+      btn.textContent = '▶ پخش';
+      btn.onclick = (e)=>{ e.stopPropagation(); handlePlay(st, btn); };
+
+      el.appendChild(left);
+      el.appendChild(btn);
+
+      // کلیک روی کل ایتم هم پخش کنه
+      el.onclick = ()=> handlePlay(st, btn);
+      return el;
+    }
+
+    stations.forEach(s => {
+      const node = makeStationElement(s);
+      if(s.lang === 'fa') cat_fa.appendChild(node);
+      else cat_tr.appendChild(node);
+    });
+
+    // مدیریت پخش
+    let currentStation = null;
+    let currentButton = null;
+
+    function handlePlay(st, btn){
+      // اگر همون ایستگاه در حال پخشه -> توقف
+      if(currentStation && currentStation.url === st.url && !audio.paused){
+        audio.pause();
+        btn.textContent = '▶ پخش';
+        nowPlaying.textContent = 'هیچ رادیویی انتخاب نشده';
+        return;
+      }
+
+      // اگر ایستگاه جدید
+      audio.src = st.url;
+      audio.play().catch(err=>{
+        console.warn('پخش ناموفق:', err);
+        alert('مرورگر اجازهٔ پخش خودکار صدا را نداد یا لینک در دسترس نیست. لطفاً یکبار روی صفحه کلیک کنید یا لینک را بررسی کنید.');
+      });
+
+      // بروزرسانی دکمه قبلی
+      if(currentButton) currentButton.textContent = '▶ پخش';
+      btn.textContent = '⏸️ توقف';
+      currentStation = st;
+      currentButton = btn;
+      nowPlaying.textContent = 'در حال پخش: ' + st.name;
+    }
+
+    // کنترل‌ها
+    volume.addEventListener('input', ()=>{ audio.volume = parseFloat(volume.value); });
+    stopBtn.addEventListener('click', ()=>{ audio.pause(); if(currentButton) currentButton.textContent='▶ پخش'; nowPlaying.textContent='هیچ رادیویی انتخاب نشده'; });
+
+    // EQUALIZER (canvas)
+    const eq = document.getElementById('eq');
+    const eqCtx = eq.getContext('2d');
+
+    // تنظیم اندازه
+    function resizeEq(){ eq.width = window.innerWidth; eq.height = 64; }
+    window.addEventListener('resize', resizeEq); resizeEq();
+
+    // WebAudio analyser
+    let audioCtx = null, analyser = null, srcNode = null;
+    function ensureAudioContext(){
+      if(audioCtx) return;
+      audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+      srcNode = audioCtx.createMediaElementSource(audio);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      srcNode.connect(analyser);
+      analyser.connect(audioCtx.destination);
+    }
+
+    function draw(){
+      requestAnimationFrame(draw);
+      if(!analyser) { eqCtx.fillStyle='#000'; eqCtx.fillRect(0,0,eq.width,eq.height); return; }
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteFrequencyData(dataArray);
+
+      eqCtx.fillStyle = '#000';
+      eqCtx.fillRect(0,0,eq.width,eq.height);
+      const barWidth = (eq.width / bufferLength) * 2.5;
+      let x = 0;
+      for(let i=0;i<bufferLength;i++){
+        const v = dataArray[i]/2;
+        eqCtx.fillStyle = '#00ffa6';
+        eqCtx.fillRect(x, eq.height - v, barWidth, v);
+        x += barWidth + 1;
+      }
+    }
+    draw();
+
+    // هنگام اولین پخش AudioContext را فعال کن
+    audio.addEventListener('play', ()=>{ try{ ensureAudioContext(); }catch(e){console.warn(e);} });
 
   </script></body>
 </html>
