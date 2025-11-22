@@ -23,19 +23,20 @@
 
     .station-list {
         margin: 20px auto;
-        max-width: 400px;
+        max-width: 450px;
     }
 
     .station {
         background: #1c1c1c;
-        margin: 10px 0;
-        padding: 15px;
-        border-radius: 10px;
+        margin: 12px 0;
+        padding: 14px;
+        border-radius: 12px;
         cursor: pointer;
         transition: 0.2s;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        font-size: 17px;
     }
 
     .station:hover {
@@ -66,18 +67,82 @@
 <div class="header">🎧 رادیو آنلاین</div>
 
 <div class="station-list">
-    <div class="station" onclick="playRadio('http://91.107.251.50:8000/radio-70s-azeri-music-glwiz', this)">
-        <span>رادیو آذری ۷۰s</span>
+
+    <div class="station" onclick="playRadio('https://stream-177.zeno.fm/1nyiz8ma60hvv', this)">
+        <span>Radio Sedaye Khiaban</span>
         <div class="play-icon"></div>
     </div>
 
-    <!-- اگر رادیو بیشتری داشتی اینطوری اضافه کن -->
-    <!--
-    <div class="station" onclick="playRadio('URL2', this)">
-        <span>اسم رادیو</span>
+    <div class="station" onclick="playRadio('https://ice9.securenetsystems.net/SHADI', this)">
+        <span>Radio Shadi</span>
         <div class="play-icon"></div>
     </div>
-    -->
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/fpabqr8pd9zuv', this)">
+        <span>Radio Avang Klap</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/16gxgv7ch5zuv', this)">
+        <span>Radio Bamdad</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/9svfnobkrxrvv', this)">
+        <span>Radio Simorgh</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/euutwhsru2wtv', this)">
+        <span>Radio Hamrah</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/oyb5oh6ne3tuv', this)">
+        <span>Radio Yar</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/2jwyo983y49vv', this)">
+        <span>Radio Yar Plus</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/wyth8w2r3heuv', this)">
+        <span>KIRN 670 AM LA</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/c3kkavhhzd0uv', this)">
+        <span>Radio Farsi London</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/x5n4sfyy9nhvv', this)">
+        <span>Arabesk Efsane FM</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/q7zxyx2qsfhvv', this)">
+        <span>Radyo Nostalji Sesi</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/0kgkkzanmueuv', this)">
+        <span>Radio Veten</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('https://stream.zeno.fm/4crdx4nukrnuv', this)">
+        <span>İznik FM</span>
+        <div class="play-icon"></div>
+    </div>
+
+    <div class="station" onclick="playRadio('http://s33.myradiostream.com:12782/listen.mp3', this)">
+        <span>Naxçıvan Radiosu</span>
+        <div class="play-icon"></div>
+    </div>
+
 </div>
 
 <audio id="player" controls></audio>
@@ -88,7 +153,7 @@ let currentStation = null;
 function playRadio(url, element) {
     let player = document.getElementById("player");
 
-    // اگر روی همون رادیو کلیک شد → توقف
+    // اگر دوباره روی همان کلیک شد → توقف
     if (currentStation === element) {
         player.pause();
         player.src = "";
@@ -97,7 +162,7 @@ function playRadio(url, element) {
         return;
     }
 
-    // توقف رادیوی قبلی
+    // توقف قبلی
     if (currentStation) {
         currentStation.querySelector("div").className = "play-icon";
     }
@@ -106,7 +171,6 @@ function playRadio(url, element) {
     currentStation = element;
     player.src = url;
     player.play();
-
     element.querySelector("div").className = "stop-icon";
 }
 </script>
