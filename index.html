@@ -273,7 +273,7 @@ function resizeEq(){
   // make canvas full width
   eq.width = window.innerWidth;
   // keep height from CSS (64) but ensure devicePixelRatio for sharpness
-  const cssH = parseInt(getComputedStyle(eq).height) || 10;
+  const cssH = parseInt(getComputedStyle(eq).height) || 0;
   const dpr = window.devicePixelRatio || 1;
   eq.width = Math.floor(window.innerWidth * dpr);
   eq.height = cssH * dpr;
