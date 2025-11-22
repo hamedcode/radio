@@ -5,55 +5,109 @@
 <title>رادیو آنلاین</title>
 <style>
     body {
+        margin: 0;
+        background: #121212;
         font-family: sans-serif;
         direction: rtl;
-        background: #f4f4f4;
-        padding: 30px;
+        color: white;
         text-align: center;
     }
-    .radio-list {
-        margin: 20px auto;
-        max-width: 300px;
-        background: #fff;
+
+    .header {
+        background: #1f1f1f;
         padding: 20px;
+        font-size: 22px;
+        font-weight: bold;
+        box-shadow: 0 2px 10px #000a;
+    }
+
+    .station-list {
+        margin: 20px auto;
+        max-width: 400px;
+    }
+
+    .station {
+        background: #1c1c1c;
+        margin: 10px 0;
+        padding: 15px;
         border-radius: 10px;
-        box-shadow: 0 0 10px #ccc;
-    }
-    button {
-        width: 100%;
-        margin: 6px 0;
-        padding: 10px;
-        font-size: 16px;
-        border: none;
-        border-radius: 6px;
         cursor: pointer;
-        background: #2196F3;
-        color: #fff;
+        transition: 0.2s;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    button:hover {
-        background: #0b7dda;
+
+    .station:hover {
+        background: #272727;
+    }
+
+    .play-icon {
+        width: 18px;
+        height: 18px;
+        border-left: 12px solid white;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+    }
+
+    .stop-icon {
+        width: 14px;
+        height: 14px;
+        background: white;
+    }
+
+    audio {
+        display: none;
     }
 </style>
 </head>
 <body>
 
-<h2>🎧 پخش زنده رادیو</h2>
+<div class="header">🎧 رادیو آنلاین</div>
 
-<audio id="player" controls style="width:90%; margin-top:20px;">
-    مرورگر شما از پخش آنلاین پشتیبانی نمی‌کند.
-</audio>
+<div class="station-list">
+    <div class="station" onclick="playRadio('http://91.107.251.50:8000/radio-70s-azeri-music-glwiz', this)">
+        <span>رادیو آذری ۷۰s</span>
+        <div class="play-icon"></div>
+    </div>
 
-<div class="radio-list">
-    <button onclick="playRadio('https://91.107.251.50:8000/radio-70s-azeri-music-glwiz')">رادیو شماره ۱</button>
-    <button onclick="playRadio('https://your-radio-link-2/stream')">رادیو شماره ۲</button>
-    <button onclick="playRadio('https://your-radio-link-3/stream')">رادیو شماره ۳</button>
+    <!-- اگر رادیو بیشتری داشتی اینطوری اضافه کن -->
+    <!--
+    <div class="station" onclick="playRadio('URL2', this)">
+        <span>اسم رادیو</span>
+        <div class="play-icon"></div>
+    </div>
+    -->
 </div>
 
+<audio id="player" controls></audio>
+
 <script>
-function playRadio(url) {
+let currentStation = null;
+
+function playRadio(url, element) {
     let player = document.getElementById("player");
+
+    // اگر روی همون رادیو کلیک شد → توقف
+    if (currentStation === element) {
+        player.pause();
+        player.src = "";
+        element.querySelector("div").className = "play-icon";
+        currentStation = null;
+        return;
+    }
+
+    // توقف رادیوی قبلی
+    if (currentStation) {
+        currentStation.querySelector("div").className = "play-icon";
+    }
+
+    // پخش جدید
+    currentStation = element;
     player.src = url;
     player.play();
+
+    element.querySelector("div").className = "stop-icon";
 }
 </script>
 
