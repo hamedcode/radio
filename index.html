@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="fa">
+<!DOCTYPE html><html lang="fa">
 <head>
   <meta charset="UTF-8" />
   <title>Online Radio Player</title>
@@ -23,98 +22,85 @@
       background: #222;
       margin-top: 20px;
       border-right: 5px solid #00ffa6;
-    }
+    }.station-list {
+  padding: 10px 20px;
+}
 
-    .station-list {
-      padding: 10px 20px;
-    }
+.station {
+  display: flex;
+  align-items: center;
+  background: #1d1d1d;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.station:hover {
+  background: #333;
+}
 
-    .station {
-      display: flex;
-      align-items: center;
-      background: #1d1d1d;
-      margin: 8px 0;
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .station:hover {
-      background: #333;
-    }
+.station img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-left: 12px;
+  object-fit: cover;
+}
 
-    .station img {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      margin-left: 12px;
-      object-fit: cover;
-    }
+/* PLAYER */
+.player-box {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #181818;
+  border-top: 2px solid #00ffa6;
+  padding: 14px;
+}
+.player-title {
+  font-size: 18px;
+  margin-bottom: 6px;
+}
 
-    /* PLAYER */
-    .player-box {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #181818;
-      border-top: 2px solid #00ffa6;
-      padding: 14px;
-    }
-    .player-title {
-      font-size: 18px;
-      margin-bottom: 6px;
-    }
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+button {
+  background: #00ffa6;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-    button {
-      background: #00ffa6;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+.visualizer {
+  width: 100%;
+  height: 50px;
+  background: #000;
+  margin-top: 10px;
+}
 
-    .visualizer {
-      width: 100%;
-      height: 50px;
-      background: #000;
-      margin-top: 10px;
-    }
   </style>
 </head>
-<body>
+<body>  <div class="header">🎧 رادیو آنلاین</div>  <!-- CATEGORY: Persian -->  <div class="cols" style="display:flex; gap:20px; padding:20px;">
+  <div style="flex:1; order:2;"> <!-- Persian column (right) -->
+    <div class="category">📌 فارسی</div>
+  <div class="station-list" id="cat_fa"></div>  <!-- CATEGORY: Turk / Azeri --></div>
 
-  <div class="header">🎧 رادیو آنلاین</div>
+  <div style="flex:1; order:1;"> <!-- Turk/Azeri column (left) -->
+    <div class="category">📌 ترکی و آذری</div>
+  <div class="station-list" id="cat_tr"></div>  <!-- PLAYER --></div>
 
-  <!-- CATEGORY: Persian -->
-  <div class="category">📌 فارسی</div>
-  <div class="station-list" id="cat_fa"></div>
-
-  <!-- CATEGORY: Turk / Azeri -->
-  <div class="category">📌 ترکی و آذری</div>
-  <div class="station-list" id="cat_tr"></div>
-
-  <!-- PLAYER -->
-  <div class="player-box">
-    <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
-
-    <audio id="player" controls style="width:100%; margin-top:10px;"></audio>
-
-    <div style="margin-top:10px;">
-      حجم صدا: <input type="range" min="0" max="1" step="0.01" value="1" onchange="player.volume=this.value">
-    </div>
-  </div>
-
-  <!-- Bottom Equalizer -->
-  <canvas id="eq" style="width:100%; height:60px; background:#000; margin-top:20px;"></canvas>
-
-  <script>
+</div>  <div class="player-box" style="position:fixed;bottom:0;left:0;right:0;background:#181818;border-top:2px solid #00ffa6;padding:14px;display:flex;justify-content:space-between;align-items:center;">
+  <div id="nowPlaying" style="font-size:18px;">هیچ رادیویی انتخاب نشده</div>
+  <button onclick="togglePlay()">▶️/⏸️</button>
+</div>
+<!-- Bottom Equalizer -->
+  <canvas id="eq" style="width:100%; height:60px; background:#000; margin-top:20px;"></canvas>  <script>
     const stations = [
       // ======== Persian ========
       { name: "Radio Sedaye Khiaban", url: "https://stream-177.zeno.fm/1nyiz8ma60hvv", lang: "fa" },
@@ -138,59 +124,24 @@
 
     const cat_fa = document.getElementById("cat_fa");
     const cat_tr = document.getElementById("cat_tr");
-    const player = document.getElementById("player");
-    const nowPlaying = document.getElementById("nowPlaying");
+    let currentUrl = null;
+const nowPlaying = document.getElementById('nowPlaying');
+const audio = new Audio();
+let isPlaying = false;
 
-    stations.forEach(st => {
-      const div = document.createElement("div");
-      div.className = "station";
-      div.textContent = st.name;
-      div.onclick = () => playStation(st);
+function playStation(st){
+  currentUrl = st.url;
+  audio.src = st.url;
+  audio.play();
+  isPlaying = true;
+  nowPlaying.textContent = "در حال پخش: " + st.name;
+}
 
-      if (st.lang === "fa") cat_fa.appendChild(div);
-      else cat_tr.appendChild(div);
-    });
+function togglePlay(){
+  if(!currentUrl) return;
+  if(isPlaying){ audio.pause(); isPlaying=false; }
+  else{ audio.play(); isPlaying=true; }
+}
 
-    function playStation(st) {
-      player.src = st.url;
-      player.play();
-      nowPlaying.textContent = "در حال پخش: " + st.name;
-    }
-
-    // Equalizer
-    const eq = document.getElementById("eq");
-    const eqCtx = eq.getContext("2d");
-    eq.width = window.innerWidth;
-
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const srcNode = audioCtx.createMediaElementSource(player);
-    const analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 256;
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    srcNode.connect(analyser);
-    analyser.connect(audioCtx.destination);
-
-    function drawEq() {
-      requestAnimationFrame(drawEq);
-      analyser.getByteFrequencyData(dataArray);
-
-      eqCtx.fillStyle = "#000";
-      eqCtx.fillRect(0, 0, eq.width, eq.height);
-
-      const barWidth = (eq.width / bufferLength) * 2.5;
-      let x = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        const barHeight = dataArray[i] / 2;
-        eqCtx.fillStyle = "#00ffa6";
-        eqCtx.fillRect(x, eq.height - barHeight, barWidth, barHeight);
-        x += barWidth + 1;
-      }
-    }
-    drawEq();
-
-  </script>
-
-</body>
+  </script></body>
 </html>
