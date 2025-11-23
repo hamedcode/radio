@@ -1,437 +1,344 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>رادیو آنلاین</title>
-  <style>
-    :root{
-      --bg:#121212;
-      --card:#1d1d1d;
-      --accent:#00ffa6;
-      --text:#eee;
-      --header:#151515;
-      --muted: rgba(255,255,255,0.06);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui, -apple-system, "Segoe UI", Roboto;
-      direction:rtl;
-      background:var(--bg);
-      color:var(--text);
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>رادیو آنلاین</title>
 
-    /* ===== Top Bar ===== */
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:12px 16px;
-      background:var(--header);
-      border-bottom:1px solid var(--muted);
-      position:sticky;
-      top:0;
-      z-index:1500;
-    }
-    .title{font-size:20px; display:flex; align-items:center; gap:10px;}
+<style>
+:root{
+  --bg:#121212;
+  --card:#1d1d1d;
+  --accent:#00ffa6;
+  --text:#eee;
+  --header:#151515;
+  --muted:rgba(255,255,255,0.06);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto;
+  direction:rtl;
+  background:var(--bg);
+  color:var(--text);
+}
 
-    .controls{display:flex; align-items:center; gap:12px;}
+/* ===== TOP BAR ===== */
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  background:var(--header);
+  border-bottom:1px solid var(--muted);
+  position:sticky;
+  top:0;
+  z-index:1500;
+}
+.title{font-size:20px}
 
-    .mode-btn{
-      background:transparent;
-      border:1px solid var(--muted);
-      color:var(--text);
-      padding:8px 10px;
-      border-radius:8px;
-      cursor:pointer;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .mode-btn.active{border-color:var(--accent);}
+/* iOS switch */
+.switch{
+  width:46px;height:24px;
+  border-radius:50px;
+  background:#555;
+  position:relative;
+  cursor:pointer;
+  transition:.25s;
+}
+.switch-circle{
+  width:20px;height:20px;
+  background:white;
+  border-radius:50%;
+  position:absolute;
+  top:2px;left:2px;
+  transition:.25s;
+}
+.switch.on{background:var(--accent)}
+.switch.on .switch-circle{left:24px}
 
-    .color-picker{
-      display:flex;
-      gap:8px;
-      padding:6px;
-      border-radius:10px;
-    }
-    .color-swatch{
-      width:22px;height:22px;
-      border-radius:50%;
-      cursor:pointer;
-      border:2px solid rgba(255,255,255,0.07);
-    }
-    .color-swatch.selected{
-      outline:2px solid #fff;
-      transform:scale(1.1);
-    }
+/* Color picker */
+.color-picker{display:flex;gap:8px}
+.color-swatch{
+  width:22px;height:22px;
+  border-radius:50%;
+  cursor:pointer;
+  border:2px solid rgba(255,255,255,0.1);
+}
+.color-swatch.selected{
+  outline:2px solid #fff;
+  transform:scale(1.1);
+}
 
-    /* ===== Layout ===== */
-    .cols{
-      display:flex;
-      gap:18px;
-      padding:16px;
-      max-width:1100px;
-      margin: 12px auto 170px auto;
-    }
-    .col{flex:1;}
-    .category{
-      background:var(--card);
-      padding:10px 14px;
-      border-radius:8px;
-      margin-bottom:10px;
-      font-size:18px;
-    }
+/* ===== CHANNEL LIST ===== */
+.cols{
+  display:flex;
+  gap:18px;
+  padding:16px;
+  max-width:1100px;
+  margin:12px auto 170px auto;
+}
+.col{flex:1}
 
-    .station-list{display:flex; flex-direction:column; gap:10px;}
-    .station{
-      background:var(--card);
-      border-radius:10px;
-      display:flex;
-      justify-content:space-between;
-      padding:10px;
-      cursor:pointer;
-    }
-    .station:hover{background:rgba(255,255,255,0.05);}
-    .station img{width:44px;height:44px;border-radius:6px;}
-    .station .left{display:flex;align-items:center;gap:12px;}
-    .station .name{font-weight:600;}
-    .station button{
-      background:var(--accent);
-      border:none;
-      padding:8px 10px;
-      border-radius:8px;
-      cursor:pointer;
-      color:#000;
-    }
+.category{
+  background:var(--card);
+  padding:10px 14px;
+  border-radius:8px;
+  margin-bottom:12px;
+  font-size:18px;
+}
 
-    /* ===== Player ===== */
-    .player-box{
-      position:fixed;
-      bottom:0; left:0; right:0;
-      padding:12px;
-      background:var(--card);
-      border-top:3px solid var(--accent);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      z-index:2000;
-      box-shadow:0 -6px 20px rgba(0,0,0,0.5);
-    }
+.station-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
 
-    #eq{
-      width:100%;
-      height:60px;
-      background:#000;
-      border-radius:6px;
-    }
+.station{
+  background:var(--card);
+  border-radius:10px;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  cursor:pointer;
+}
+.station:hover{background:rgba(255,255,255,0.05)}
+.left{display:flex;align-items:center;gap:12px}
+.station img{
+  width:44px;height:44px;
+  border-radius:6px;
+  object-fit:cover;
+}
+.name{font-weight:600}
 
-    .player-controls{
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .player-title{
-      flex:1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+.station button{
+  background:var(--accent);
+  border:none;
+  padding:8px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  color:#000;
+}
 
-    @media(max-width:900px){
-      .cols{flex-direction:column; margin-bottom:230px;}
-      #eq{height:45px;}
-    }
-  </style>
+/* ===== PLAYER ===== */
+.player-box{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  padding:12px;
+  background:var(--card);
+  border-top:3px solid var(--accent);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:2000;
+  box-shadow:0 -6px 25px rgba(0,0,0,0.6);
+}
+
+#eq{
+  width:100%;height:60px;
+  background:#000;border-radius:6px;
+}
+
+.player-controls{
+  display:flex;
+  gap:12px;
+  align-items:center;
+}
+.player-title{
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+@media(max-width:900px){
+  .cols{flex-direction:column;margin-bottom:230px}
+  #eq{height:45px}
+}
+</style>
 </head>
+
 <body>
 
-  <!-- ============================= -->
-  <!--           TOP BAR             -->
-  <!-- ============================= -->
-  <div class="topbar">
-    <div class="title">🎧 رادیو آنلاین</div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="title">🎧 رادیو آنلاین</div>
 
-    <div class="controls">
-      <button id="modeBtn" class="mode-btn">
-        <span id="modeIcon">🌙</span>
-        <span id="modeText">دارک</span>
-      </button>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div id="themeSwitch" class="switch">
+      <div class="switch-circle"></div>
+    </div>
 
-      <div class="color-picker" id="colorPicker">
-        <div class="color-swatch" data-color="#00ffa6" style="background:#00ffa6"></div>
-        <div class="color-swatch" data-color="#00aaff" style="background:#00aaff"></div>
-        <div class="color-swatch" data-color="#ffcc00" style="background:#ffcc00"></div>
-        <div class="color-swatch" data-color="#ff4444" style="background:#ff4444"></div>
-        <div class="color-swatch" data-color="#c95bff" style="background:#c95bff"></div>
-      </div>
+    <div class="color-picker" id="colorPicker">
+      <div class="color-swatch selected" data-color="#00ffa6" style="background:#00ffa6"></div>
+      <div class="color-swatch" data-color="#00aaff" style="background:#00aaff"></div>
+      <div class="color-swatch" data-color="#ffcc00" style="background:#ffcc00"></div>
+      <div class="color-swatch" data-color="#ff4444" style="background:#ff4444"></div>
+      <div class="color-swatch" data-color="#c95bff" style="background:#c95bff"></div>
     </div>
   </div>
+</div>
 
-  <!-- ============================= -->
-  <!--           CHANNELS            -->
-  <!-- ============================= -->
-  <div class="cols">
-    <div class="col">
-      <div class="category">📌 ترکی و آذری</div>
-      <div class="station-list" id="cat_tr"></div>
-    </div>
-
-    <div class="col">
-      <div class="category">📌 فارسی</div>
-      <div class="station-list" id="cat_fa"></div>
-    </div>
+<!-- CHANNEL LIST -->
+<div class="cols">
+  <div class="col">
+    <div class="category">📌 ترکی و آذری</div>
+    <div class="station-list" id="cat_tr"></div>
   </div>
 
-  <!-- ============================= -->
-  <!--            PLAYER             -->
-  <!-- ============================= -->
-  <div class="player-box">
-    <canvas id="eq"></canvas>
-
-    <div class="player-controls">
-      <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
-
-      حجم:
-      <input class="vol" id="volume" type="range" min="0" max="1" step="0.01" value="1">
-
-      <button id="stopBtn">⏹ توقف</button>
-    </div>
+  <div class="col">
+    <div class="category">📌 فارسی</div>
+    <div class="station-list" id="cat_fa"></div>
   </div>
+</div>
+
+<!-- PLAYER -->
+<div class="player-box">
+  <canvas id="eq"></canvas>
+
+  <div class="player-controls">
+    <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
+
+    حجم:
+    <input id="volume" type="range" min="0" max="1" value="1" step="0.01">
+
+    <button id="stopBtn">⏹ توقف</button>
+  </div>
+</div>
 
 <script>
-/* ==============================
-   Stations List (unchanged)
-   ============================== */
-const stations = [
-  {name:"Radio Shadi", url:"https://ice9.securenetsystems.net/SHADI", lang:"fa",
-   logo:"https://images.zeno.fm/NRIGBcOzqWFUZZ4dhVZ3bp6oKMftJTpniyrmgru7dZM"},
-  {name:"Radio Avang Klap", url:"https://stream.zeno.fm/fpabqr8pd9zuv", lang:"fa",
-   logo:"https://images.zeno.fm/acnY7ntKys9h-2AhQvRWpVDUV0WY3Kh-Jfb8rkjNuH4"},
-  {name:"Radio Bamdad", url:"https://stream.zeno.fm/16gxgv7ch5zuv", lang:"fa",
-   logo:"https://images.zeno.fm/RI7ZbLc36B1wt2hmlyMxSBwXpETbKBuvcd6coiCjGds"},
-  {name:"Radio Simorgh", url:"https://stream.zeno.fm/9svfnobkrxrvv", lang:"fa",
-   logo:"https://images.zeno.fm/eNYSMBmJNoW6_hcdkosiReSKOx7HHLAn7fP6Tso3DWc"},
-  {name:"Radio Hamrah", url:"https://stream.zeno.fm/euutwhsru2wtv", lang:"fa",
-   logo:"https://images.zeno.fm/QXH8sr3xE8WGEbYBpaNlPpoAuEMKqcEoFDAZOS_fixI"},
-  {name:"Radio Yar", url:"https://stream.zeno.fm/oyb5oh6ne3tuv", lang:"fa",
-   logo:"https://images.zeno.fm/kw4YYJRvsl-DswchOsWr3Vtz1MnLY8gfkPAf_FSMgyo"},
-  {name:"Radio Yar Plus", url:"https://stream.zeno.fm/2jwyo983y49vv", lang:"fa",
-   logo:"https://images.zeno.fm/7XCVsr_ZE1q3fpPcrCpQD1prYmMrjHoCWo2u7sHhGYU"},
-  {name:"KIRN 670 AM", url:"https://stream.zeno.fm/wyth8w2r3heuv", lang:"fa",
-   logo:"https://images.zeno.fm/YJygcpY0wJ-ORl7yrs57txbWABe87n5INuAERhqfRXk"},
-  {name:"Radio Farsi London", url:"https://stream.zeno.fm/c3kkavhhzd0uv", lang:"fa",
-   logo:"https://images.zeno.fm/-YxtmG_1FTNyGCT_8g7soWRiEMvzx7HNLWvs57CcbIw"},
-
-  /* Turkish */
-  {name:"Arabesk Efsane FM", url:"https://stream.zeno.fm/x5n4sfyy9nhvv", lang:"tr",
-   logo:"https://images.zeno.fm/6PGFwWVgLll3f4INzxVqlwdjpOfStwE2wVTFu6GDrzw"},
-  {name:"Radyo Nostalji", url:"https://stream.zeno.fm/q7zxyx2qsfhvv", lang:"tr",
-   logo:"https://images.zeno.fm/C40EP-w5lbCEjhD3OEXoLH0mqT4QAjoi3HcMlrdprM0"},
-  {name:"Radio Veten", url:"https://stream.zeno.fm/0kgkkzanmueuv", lang:"tr",
-   logo:"https://images.zeno.fm/8g8PctmUYIp-MsAb60n1yzr6UB2mIagYYh9OFcI8AO4"},
-  {name:"İznik FM", url:"https://stream.zeno.fm/4crdx4nukrnuv", lang:"tr",
-   logo:"https://images.zeno.fm/cbY5lyYrOd6Dy6Dor1DhLsqTzzfB4I8-0dwyooRgQa4"},
-  {name:"Naxçıvan Radiosu", url:"http://s33.myradiostream.com:12782/listen.mp3", lang:"tr",
-   logo:"https://images.zeno.fm/qpsO_iNA8aGqsKrXHX0fUneE_f0gUl1kqYwilPn2HD4"}
+/* ====================== */
+/*      CHANNEL DATA      */
+/* ====================== */
+const channelsTR = [
+  {name:"Radio Türk 1", url:"https://stream.zeno.fm/yourstream1", logo:"https://stream.zeno.fm/logos/zeno.png"},
+  {name:"Radio Türk 2", url:"https://stream.zeno.fm/yourstream2", logo:"https://stream.zeno.fm/logos/zeno.png"},
 ];
 
-/* Build lists */
-const cat_fa = document.getElementById('cat_fa');
-const cat_tr = document.getElementById('cat_tr');
+const channelsFA = [
+  {name:"رادیو جوان", url:"https://stream.zeno.fm/9svfnobkrxrvv", logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/eNYSMBmJNoW6_hcdkosiReSKOx7HHLAn7fP6Tso3DWc/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvMjAxZGE3MmItNWFhYy00OWU5LWEzN2YtM2IzYjZjZjZmZjQxL2ltYWdlLz91PTE3NjMxNjAxMzcwMDA.webp"},
+  {name:"رادیو پاپ فارسی", url:"https://stream.zeno.fm/yourstream4", logo:"https://stream.zeno.fm/logos/zeno.png"},
+];
 
-function makeEl(st){
-  const box = document.createElement('div');
-  box.className="station";
+function createList(list, target){
+  target.innerHTML = "";
+  list.forEach(ch=>{
+    const el = document.createElement("div");
+    el.className="station";
 
-  const L = document.createElement('div');
-  L.className="left";
-
-  const img = document.createElement('img');
-  img.src = st.logo;
-  img.onerror = ()=>img.style.display="none";
-
-  const meta = document.createElement('div');
-  const name = document.createElement('div');
-  name.className="name";
-  name.textContent = st.name;
-
-  meta.appendChild(name);
-  L.appendChild(img);
-  L.appendChild(meta);
-
-  const btn = document.createElement('button');
-  btn.textContent="▶ پخش";
-
-  box.appendChild(L);
-  box.appendChild(btn);
-
-  box.onclick = ()=> play(st, btn);
-  btn.onclick = e=>{ e.stopPropagation(); play(st, btn); };
-
-  return box;
+    el.innerHTML = `
+      <div class="left">
+        <img src="${ch.logo}" referrerpolicy="no-referrer">
+        <div class="name">${ch.name}</div>
+      </div>
+      <button>پخش</button>
+    `;
+    el.querySelector("button").onclick = ()=>playChannel(ch);
+    target.appendChild(el);
+  });
 }
 
-stations.forEach(s=>{
-  const el = makeEl(s);
-  if(s.lang==="fa") cat_fa.appendChild(el);
-  else cat_tr.appendChild(el);
-});
+createList(channelsTR, document.getElementById("cat_tr"));
+createList(channelsFA, document.getElementById("cat_fa"));
 
-/* ===== Audio ===== */
-const audio = new Audio();
-audio.crossOrigin="anonymous";
-audio.volume=1;
-let currentBtn=null;
-let currentStation=null;
+/* ====================== */
+/*        PLAYER          */
+/* ====================== */
+let audio = new Audio();
+audio.crossOrigin = "anonymous";
 
-const nowPlaying = document.getElementById('nowPlaying');
-const volume = document.getElementById('volume');
-const stopBtn = document.getElementById('stopBtn');
+let ctx = new AudioContext();
+let src = ctx.createMediaElementSource(audio);
+let analyser = ctx.createAnalyser();
+analyser.fftSize = 256;
+analyser.smoothingTimeConstant = 0.55;
+src.connect(analyser);
+analyser.connect(ctx.destination);
 
-function play(st, btn){
-  if(currentStation && currentStation.url===st.url && !audio.paused){
-    audio.pause();
-    btn.textContent="▶ پخش";
-    nowPlaying.textContent="هیچ رادیویی انتخاب نشده";
-    return;
-  }
+const eq = document.getElementById("eq");
+const eqCtx = eq.getContext("2d");
 
-  audio.src = st.url;
+function playChannel(ch){
+  audio.src = ch.url;
   audio.play();
 
-  if(currentBtn) currentBtn.textContent="▶ پخش";
-  btn.textContent="⏸ توقف";
-
-  currentBtn = btn;
-  currentStation = st;
-  nowPlaying.textContent="در حال پخش: "+st.name;
+  document.getElementById("nowPlaying").textContent = ch.name;
 }
 
-volume.oninput = ()=> audio.volume = volume.value;
-stopBtn.onclick = ()=>{
-  audio.pause();
-  if(currentBtn) currentBtn.textContent="▶ پخش";
-  nowPlaying.textContent="هیچ رادیویی انتخاب نشده";
-};
+document.getElementById("stopBtn").onclick = ()=>audio.pause();
+document.getElementById("volume").oninput = e => audio.volume = e.target.value;
 
-/* ===== Theme ===== */
-const modeBtn = document.getElementById('modeBtn');
-const modeIcon = document.getElementById('modeIcon');
-const modeText = document.getElementById('modeText');
-const THEME_KEY="theme";
-
-function applyLight(){
-  document.documentElement.style.setProperty('--bg','#e5e7eb');
-  document.documentElement.style.setProperty('--card','#f3f4f6');
-  document.documentElement.style.setProperty('--text','#1f2937');
-  document.documentElement.style.setProperty('--header','#f3f4f6');
-  document.documentElement.style.setProperty('--muted','rgba(0,0,0,0.08)');
-  modeIcon.textContent="☀️";
-  modeText.textContent="لایت";
-  modeBtn.classList.add("active");
-  localStorage.setItem(THEME_KEY,"light");
-}
-function applyDark(){
-  document.documentElement.style.setProperty('--bg','#121212');
-  document.documentElement.style.setProperty('--card','#1d1d1d');
-  document.documentElement.style.setProperty('--text','#eee');
-  document.documentElement.style.setProperty('--header','#151515');
-  document.documentElement.style.setProperty('--muted','rgba(255,255,255,0.06)');
-  modeIcon.textContent="🌙";
-  modeText.textContent="دارک";
-  modeBtn.classList.remove("active");
-  localStorage.setItem(THEME_KEY,"dark");
-}
-
-if(localStorage.getItem(THEME_KEY)==="light") applyLight();
-else applyDark();
-
-modeBtn.onclick = ()=>{
-  if(localStorage.getItem(THEME_KEY)==="light") applyDark();
-  else applyLight();
-};
-
-/* ===== Accent Colors ===== */
-const swatches = [...document.querySelectorAll('.color-swatch')];
-const ACCENT_KEY="accent";
-function applyAccent(c){
-  document.documentElement.style.setProperty('--accent', c);
-  swatches.forEach(s=>s.classList.remove("selected"));
-  swatches.find(s=>s.dataset.color===c).classList.add("selected");
-  localStorage.setItem(ACCENT_KEY,c);
-}
-const savedAccent = localStorage.getItem(ACCENT_KEY) || "#00ffa6";
-applyAccent(savedAccent);
-
-swatches.forEach(s=>{
-  s.onclick = ()=> applyAccent(s.dataset.color);
-});
-
-/* ===== Equalizer ===== */
-const eq=document.getElementById('eq');
-const ctx=eq.getContext('2d');
-
-function resize(){
-  const dpr=window.devicePixelRatio||1;
-  const h=parseInt(getComputedStyle(eq).height);
-  eq.width = eq.clientWidth*dpr;
-  eq.height = h*dpr;
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-}
-window.addEventListener('resize',resize);
-resize();
-
-let AC=null, AN=null, SRC=null;
-
-function initAC(){
-  if(AC) return;
-  AC = new AudioContext();
-  SRC = AC.createMediaElementSource(audio);
-  AN = AC.createAnalyser();
-  AN.fftSize = 256;
-  AN.smoothingTimeConstant = 0.55;
-  SRC.connect(AN);
-  AN.connect(AC.destination);
-}
-
-audio.addEventListener("play", ()=> initAC());
-
+/* EQ Draw */
 function draw(){
   requestAnimationFrame(draw);
 
-  if(!AN){
-    ctx.fillStyle="#000";
-    ctx.fillRect(0,0,eq.clientWidth,eq.clientHeight);
-    return;
-  }
+  const buffer = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteFrequencyData(buffer);
 
-  const buf=AN.frequencyBinCount;
-  const arr=new Uint8Array(buf);
-  AN.getByteFrequencyData(arr);
+  const W = eq.width = eq.clientWidth;
+  const H = eq.height = eq.clientHeight;
 
-  const usable = Math.floor(buf*0.80); // skip last 20%
+  eqCtx.fillStyle = "#000";
+  eqCtx.fillRect(0,0,W,H);
 
-  const w=eq.clientWidth;
-  const h=eq.clientHeight;
-  ctx.fillStyle="#000";
-  ctx.fillRect(0,0,w,h);
+  const usable = Math.floor(buffer.length * 0.80);
+  const barW = (W / usable) * 1.8;
+  let x = 0;
 
-  const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-
-  const barW=(w/usable)*1.8;
-  let x=0;
+  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
 
   for(let i=0;i<usable;i++){
-    const v = (arr[i]/255)*h;
-    ctx.fillStyle=accent;
-    ctx.fillRect(x,h-v,barW,v);
-    x+=barW+1;
+    const val = buffer[i]/255;
+    const h = val*H;
+
+    eqCtx.fillStyle = accent;
+    eqCtx.fillRect(x, H-h, barW, h);
+
+    x += barW+1;
   }
 }
 draw();
+
+/* ====================== */
+/*   THEME + ACCENT       */
+/* ====================== */
+const sw = document.getElementById("themeSwitch");
+
+function applyDark(){
+  document.documentElement.style.setProperty("--bg","#121212");
+  document.documentElement.style.setProperty("--card","#1d1d1d");
+  document.documentElement.style.setProperty("--header","#151515");
+  document.documentElement.style.setProperty("--text","#eee");
+  document.documentElement.style.setProperty("--muted","rgba(255,255,255,0.06)");
+}
+function applyLight(){
+  document.documentElement.style.setProperty("--bg","#e5e7eb");
+  document.documentElement.style.setProperty("--card","#e9ecf0");
+  document.documentElement.style.setProperty("--header","#e3e6eb");
+  document.documentElement.style.setProperty("--text","#1f2937");
+  document.documentElement.style.setProperty("--muted","rgba(0,0,0,0.10)");
+}
+
+applyDark(); /* default */
+
+sw.onclick = ()=>{
+  sw.classList.toggle("on");
+
+  if(sw.classList.contains("on")) applyLight();
+  else applyDark();
+};
+
+/* accent color */
+document.querySelectorAll(".color-swatch").forEach(el=>{
+  el.onclick=()=>{
+    document.querySelectorAll(".color-swatch").forEach(s=>s.classList.remove("selected"));
+    el.classList.add("selected");
+
+    const c = el.dataset.color;
+    document.documentElement.style.setProperty("--accent",c);
+  };
+});
 </script>
+
 </body>
 </html>
