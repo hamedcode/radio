@@ -8,27 +8,25 @@
     :root{
       --bg:#121212;
       --card:#1d1d1d;
-      --accent:#00ffa6; /* default accent */
+      --accent:#00ffa6;
       --text:#eee;
       --header:#151515;
       --muted: rgba(255,255,255,0.06);
     }
-    /* Light theme vars will be applied by JS when toggled */
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      font-family:system-ui, -apple-system, "Segoe UI", Roboto;
       direction:rtl;
       background:var(--bg);
       color:var(--text);
-      -webkit-font-smoothing:antialiased;
     }
 
+    /* ===== Top Bar ===== */
     .topbar{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
       padding:12px 16px;
       background:var(--header);
       border-bottom:1px solid var(--muted);
@@ -36,19 +34,10 @@
       top:0;
       z-index:1500;
     }
-    .title{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-size:20px;
-    }
+    .title{font-size:20px; display:flex; align-items:center; gap:10px;}
 
-    /* controls area (toggle + color picker) */
-    .controls{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
+    .controls{display:flex; align-items:center; gap:12px;}
+
     .mode-btn{
       background:transparent;
       border:1px solid var(--muted);
@@ -56,35 +45,30 @@
       padding:8px 10px;
       border-radius:8px;
       cursor:pointer;
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-    }
-    .mode-btn.active{ border-color: var(--accent); box-shadow: 0 0 8px rgba(0,0,0,0.2); }
-
-    .color-picker{
       display:flex;
       align-items:center;
       gap:8px;
-      background:transparent;
+    }
+    .mode-btn.active{border-color:var(--accent);}
+
+    .color-picker{
+      display:flex;
+      gap:8px;
       padding:6px;
       border-radius:10px;
     }
     .color-swatch{
-      width:22px;
-      height:22px;
+      width:22px;height:22px;
       border-radius:50%;
-      border:2px solid rgba(255,255,255,0.06);
       cursor:pointer;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.4);
-      transition: transform .08s;
+      border:2px solid rgba(255,255,255,0.07);
     }
-    .color-swatch:active{ transform: scale(.92); }
     .color-swatch.selected{
-      outline: 2px solid #fff;
-      transform: scale(1.08);
+      outline:2px solid #fff;
+      transform:scale(1.1);
     }
 
+    /* ===== Layout ===== */
     .cols{
       display:flex;
       gap:18px;
@@ -94,49 +78,47 @@
     }
     .col{flex:1;}
     .category{
-      padding:10px 14px;
-      font-size:18px;
       background:var(--card);
+      padding:10px 14px;
       border-radius:8px;
       margin-bottom:10px;
+      font-size:18px;
     }
 
-    .station-list{display:flex;flex-direction:column;gap:10px}
+    .station-list{display:flex; flex-direction:column; gap:10px;}
     .station{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
       background:var(--card);
-      padding:10px;
       border-radius:10px;
+      display:flex;
+      justify-content:space-between;
+      padding:10px;
       cursor:pointer;
-      transition: background .15s;
-      color:var(--text);
     }
-    .station:hover{background:rgba(255,255,255,0.02)}
-    .station .left{display:flex;align-items:center;gap:12px}
-    .station img{width:44px;height:44px;border-radius:6px;object-fit:cover}
-    .station .meta{display:flex;flex-direction:column;text-align:right}
-    .station .name{font-weight:600}
+    .station:hover{background:rgba(255,255,255,0.05);}
+    .station img{width:44px;height:44px;border-radius:6px;}
+    .station .left{display:flex;align-items:center;gap:12px;}
+    .station .name{font-weight:600;}
     .station button{
       background:var(--accent);
-      border:none;color:#000;padding:8px 10px;border-radius:8px;cursor:pointer;
+      border:none;
+      padding:8px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      color:#000;
     }
 
-    /* پلیر + اکولایزر */
+    /* ===== Player ===== */
     .player-box{
       position:fixed;
-      bottom:0;
-      left:0;
-      right:0;
+      bottom:0; left:0; right:0;
+      padding:12px;
       background:var(--card);
       border-top:3px solid var(--accent);
-      padding:10px 14px;
       display:flex;
       flex-direction:column;
       gap:10px;
       z-index:2000;
-      box-shadow: 0 -6px 20px rgba(0,0,0,0.5);
+      box-shadow:0 -6px 20px rgba(0,0,0,0.5);
     }
 
     #eq{
@@ -144,342 +126,312 @@
       height:60px;
       background:#000;
       border-radius:6px;
-      display:block;
-      margin-bottom:4px; /* چسبیده به کنترل‌ها */
     }
 
     .player-controls{
       display:flex;
-      align-items:center;
       gap:12px;
+      align-items:center;
     }
     .player-title{
       flex:1;
-      font-size:15px;
-      overflow:hidden;
       white-space:nowrap;
+      overflow:hidden;
       text-overflow:ellipsis;
     }
-    .vol{width:140px}
 
     @media(max-width:900px){
-      .cols{flex-direction:column;margin-bottom:220px}
+      .cols{flex-direction:column; margin-bottom:230px;}
       #eq{height:45px;}
-      .topbar{padding:10px}
-      .title{font-size:18px}
     }
   </style>
 </head>
 <body>
 
+  <!-- ============================= -->
+  <!--           TOP BAR             -->
+  <!-- ============================= -->
   <div class="topbar">
     <div class="title">🎧 رادیو آنلاین</div>
 
-    <div class="controls" aria-hidden="false">
-      <!-- Night/Day toggle -->
-      <button id="modeBtn" class="mode-btn" title="تغییر حالت (شب/روز)">
+    <div class="controls">
+      <button id="modeBtn" class="mode-btn">
         <span id="modeIcon">🌙</span>
         <span id="modeText">دارک</span>
       </button>
 
-      <!-- color picker -->
-      <div class="color-picker" id="colorPicker" aria-label="انتخاب رنگ تم">
-        <div class="color-swatch" data-color="#00ffa6" style="background:#00ffa6" title="سبز"></div>
-        <div class="color-swatch" data-color="#00aaff" style="background:#00aaff" title="آبی"></div>
-        <div class="color-swatch" data-color="#ffcc00" style="background:#ffcc00" title="زرد"></div>
-        <div class="color-swatch" data-color="#ff4444" style="background:#ff4444" title="قرمز"></div>
-        <div class="color-swatch" data-color="#c95bff" style="background:#c95bff" title="بنفش"></div>
+      <div class="color-picker" id="colorPicker">
+        <div class="color-swatch" data-color="#00ffa6" style="background:#00ffa6"></div>
+        <div class="color-swatch" data-color="#00aaff" style="background:#00aaff"></div>
+        <div class="color-swatch" data-color="#ffcc00" style="background:#ffcc00"></div>
+        <div class="color-swatch" data-color="#ff4444" style="background:#ff4444"></div>
+        <div class="color-swatch" data-color="#c95bff" style="background:#c95bff"></div>
       </div>
     </div>
   </div>
 
+  <!-- ============================= -->
+  <!--           CHANNELS            -->
+  <!-- ============================= -->
   <div class="cols">
     <div class="col">
       <div class="category">📌 ترکی و آذری</div>
       <div class="station-list" id="cat_tr"></div>
     </div>
+
     <div class="col">
       <div class="category">📌 فارسی</div>
       <div class="station-list" id="cat_fa"></div>
     </div>
   </div>
 
-  <!-- پلیر + اکولایزر یکجا -->
-  <div class="player-box" role="region" aria-label="پلیر و اکولایزر">
-    <canvas id="eq" aria-hidden="true"></canvas>
+  <!-- ============================= -->
+  <!--            PLAYER             -->
+  <!-- ============================= -->
+  <div class="player-box">
+    <canvas id="eq"></canvas>
 
     <div class="player-controls">
       <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
+
       حجم:
-      <input class="vol" id="volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="حجم صدا">
-      <button id="stopBtn" title="توقف پخش">⏹ توقف</button>
+      <input class="vol" id="volume" type="range" min="0" max="1" step="0.01" value="1">
+
+      <button id="stopBtn">⏹ توقف</button>
     </div>
   </div>
 
 <script>
-/* ==========================
-   Stations list (unchanged)
-   ========================== */
+/* ==============================
+   Stations List (unchanged)
+   ============================== */
 const stations = [
-  { name:"Radio Shadi", url:"https://ice9.securenetsystems.net/SHADI", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/NRIGBcOzqWFUZZ4dhVZ3bp6oKMftJTpniyrmgru7dZM/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvOGUyZDcwMjUtMmZhMC00MDU5LWFmNGMtMDg0ZjA1NmZjOTk4L2ltYWdlLz91PTE3MDE2OTc1OTEwMDA.webp" },
+  {name:"Radio Shadi", url:"https://ice9.securenetsystems.net/SHADI", lang:"fa",
+   logo:"https://images.zeno.fm/NRIGBcOzqWFUZZ4dhVZ3bp6oKMftJTpniyrmgru7dZM"},
+  {name:"Radio Avang Klap", url:"https://stream.zeno.fm/fpabqr8pd9zuv", lang:"fa",
+   logo:"https://images.zeno.fm/acnY7ntKys9h-2AhQvRWpVDUV0WY3Kh-Jfb8rkjNuH4"},
+  {name:"Radio Bamdad", url:"https://stream.zeno.fm/16gxgv7ch5zuv", lang:"fa",
+   logo:"https://images.zeno.fm/RI7ZbLc36B1wt2hmlyMxSBwXpETbKBuvcd6coiCjGds"},
+  {name:"Radio Simorgh", url:"https://stream.zeno.fm/9svfnobkrxrvv", lang:"fa",
+   logo:"https://images.zeno.fm/eNYSMBmJNoW6_hcdkosiReSKOx7HHLAn7fP6Tso3DWc"},
+  {name:"Radio Hamrah", url:"https://stream.zeno.fm/euutwhsru2wtv", lang:"fa",
+   logo:"https://images.zeno.fm/QXH8sr3xE8WGEbYBpaNlPpoAuEMKqcEoFDAZOS_fixI"},
+  {name:"Radio Yar", url:"https://stream.zeno.fm/oyb5oh6ne3tuv", lang:"fa",
+   logo:"https://images.zeno.fm/kw4YYJRvsl-DswchOsWr3Vtz1MnLY8gfkPAf_FSMgyo"},
+  {name:"Radio Yar Plus", url:"https://stream.zeno.fm/2jwyo983y49vv", lang:"fa",
+   logo:"https://images.zeno.fm/7XCVsr_ZE1q3fpPcrCpQD1prYmMrjHoCWo2u7sHhGYU"},
+  {name:"KIRN 670 AM", url:"https://stream.zeno.fm/wyth8w2r3heuv", lang:"fa",
+   logo:"https://images.zeno.fm/YJygcpY0wJ-ORl7yrs57txbWABe87n5INuAERhqfRXk"},
+  {name:"Radio Farsi London", url:"https://stream.zeno.fm/c3kkavhhzd0uv", lang:"fa",
+   logo:"https://images.zeno.fm/-YxtmG_1FTNyGCT_8g7soWRiEMvzx7HNLWvs57CcbIw"},
 
-  { name:"Radio Avang Klap", url:"https://stream.zeno.fm/fpabqr8pd9zuv", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/acnY7ntKys9h-2AhQvRWpVDUV0WY3Kh-Jfb8rkjNuH4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvNTBmMmVlYjAtNzVkOC00YTllLTlkNWYtZjY1YjkwYjk3MDQ2L2ltYWdlLz91PTE3MzY4NDYwMzEwMDA.webp" },
-
-  { name:"Radio Bamdad", url:"https://s2.cdn3.iranseda.ir/liveedge/radio-payam/playlist.m3u8", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/RI7ZbLc36B1wt2hmlyMxSBwXpETbKBuvcd6coiCjGds/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ1FvLTdyMGdvTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ1E0OGEwaUFnTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY2MDgzMzA4MjAwMA.webp" },
-
-  { name:"Radio Simorgh", url:"https://stream.zeno.fm/9svfnobkrxrvv", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/eNYSMBmJNoW6_hcdkosiReSKOx7HHLAn7fP6Tso3DWc/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvMjAxZGE3MmItNWFhYy00OWU5LWEzN2YtM2IzYjZjZjZmZjQxL2ltYWdlLz91PTE3NjMxNjAxMzcwMDA.webp" },
-
-  { name:"Radio Hamrah", url:"https://stream.zeno.fm/euutwhsru2wtv", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/QXH8sr3xE8WGEbYBpaNlPpoAuEMKqcEoFDAZOS_fixI/rs:fill:256:256/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlHd3NTRGxOMFlYUnBiMjVRY205bWFXeGxHSUNBZ0lEUDd0b0tES0lCQkhwbGJtOC9pbWFnZS8_dT0xNjcyMzAxMjY3MDAw.webp" },
-
-  { name:"Radio Yar", url:"https://stream.zeno.fm/oyb5oh6ne3tuv", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/kw4YYJRvsl-DswchOsWr3Vtz1MnLY8gfkPAf_FSMgyo/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvMWRjZmJjMzktYzM4NS00OTg3LWE5ZTQtYTFiMjE0NDAzZDg3L2ltYWdlLz91PTE3MjgzOTk2MzcwMDA.webp" },
-
-  { name:"Radio Yar Plus", url:"https://stream.zeno.fm/2jwyo983y49vv", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/7XCVsr_ZE1q3fpPcrCpQD1prYmMrjHoCWo2u7sHhGYU/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvZDYxZWM4ZjMtZTI1NC00ODBmLWE1NzAtNTZhNjYxYjY0ZTllL2ltYWdlLz91PTE3MzgxNTc4NTMwMDA.webp" },
-
-  { name:"KIRN 670 AM", url:"https://stream.zeno.fm/wyth8w2r3heuv", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/YJygcpY0wJ-ORl7yrs57txbWABe87n5INuAERhqfRXk/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0F0NWZQcWdvTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0F3TW00akFvTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY2MTI4MjY5MzAwMA.webp" },
-
-  { name:"Radio Farsi London", url:"https://stream.zeno.fm/c3kkavhhzd0uv", lang:"fa",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/-YxtmG_1FTNyGCT_8g7soWRiEMvzx7HNLWvs57CcbIw/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJREFqUHZXa0FnTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJRFEybzJKdVFvTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY3ODA2MTQ1MDAwMA.webp" },
-
-  /* ترک / آذری */
-  { name:"Arabesk Efsane FM", url:"https://stream.zeno.fm/x5n4sfyy9nhvv", lang:"tr",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/6PGFwWVgLll3f4INzxVqlwdjpOfStwE2wVTFu6GDrzw/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0l6YVR3dndnTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0lfYi1XNFFrTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY4NTE3MjE5NTAwMA.webp" },
-
-  { name:"Radyo Nostalji", url:"https://stream.zeno.fm/q7zxyx2qsfhvv", lang:"tr",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/C40EP-w5lbCEjhD3OEXoLH0mqT4QAjoi3HcMlrdprM0/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0F4SkdkdkFzTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0k2b3FmX3drTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY4NjQ5NTUzMzAwMA.webp" },
-
-  { name:"Radio Veten", url:"https://stream.zeno.fm/0kgkkzanmueuv", lang:"tr",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/8g8PctmUYIp-MsAb60n1yzr6UB2mIagYYh9OFcI8AO4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJREFwdENqdkFzTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0FnSUR5aUFvTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY3NDE5MDEyNzAwMA.webp" },
-
-  { name:"İznik FM", url:"https://stream.zeno.fm/4crdx4nukrnuv", lang:"tr",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/cbY5lyYrOd6Dy6Dor1DhLsqTzzfB4I8-0dwyooRgQa4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvNzkwYTBjYjctYTMwMC00ODRjLWI2ZjItMTg5YmNjOWFjNmM1L2ltYWdlLz91PTE3NjI2ODg4ODIwMDA.webp" },
-
-  { name:"Naxçıvan Radiosu", url:"http://s33.myradiostream.com:12782/listen.mp3", lang:"tr",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/qpsO_iNA8aGqsKrXHX0fUneE_f0gUl1kqYwilPn2HD4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvMjlmNzI0NTEtOWM2Ny00YzgxLWE0MTMtMWFlODJjYTM2ZWY4L2ltYWdlLz91PTE3MDE2OTY4MDYwMDA.webp" }
+  /* Turkish */
+  {name:"Arabesk Efsane FM", url:"https://stream.zeno.fm/x5n4sfyy9nhvv", lang:"tr",
+   logo:"https://images.zeno.fm/6PGFwWVgLll3f4INzxVqlwdjpOfStwE2wVTFu6GDrzw"},
+  {name:"Radyo Nostalji", url:"https://stream.zeno.fm/q7zxyx2qsfhvv", lang:"tr",
+   logo:"https://images.zeno.fm/C40EP-w5lbCEjhD3OEXoLH0mqT4QAjoi3HcMlrdprM0"},
+  {name:"Radio Veten", url:"https://stream.zeno.fm/0kgkkzanmueuv", lang:"tr",
+   logo:"https://images.zeno.fm/8g8PctmUYIp-MsAb60n1yzr6UB2mIagYYh9OFcI8AO4"},
+  {name:"İznik FM", url:"https://stream.zeno.fm/4crdx4nukrnuv", lang:"tr",
+   logo:"https://images.zeno.fm/cbY5lyYrOd6Dy6Dor1DhLsqTzzfB4I8-0dwyooRgQa4"},
+  {name:"Naxçıvan Radiosu", url:"http://s33.myradiostream.com:12782/listen.mp3", lang:"tr",
+   logo:"https://images.zeno.fm/qpsO_iNA8aGqsKrXHX0fUneE_f0gUl1kqYwilPn2HD4"}
 ];
 
-/* ===== create UI items ===== */
+/* Build lists */
 const cat_fa = document.getElementById('cat_fa');
 const cat_tr = document.getElementById('cat_tr');
+
+function makeEl(st){
+  const box = document.createElement('div');
+  box.className="station";
+
+  const L = document.createElement('div');
+  L.className="left";
+
+  const img = document.createElement('img');
+  img.src = st.logo;
+  img.onerror = ()=>img.style.display="none";
+
+  const meta = document.createElement('div');
+  const name = document.createElement('div');
+  name.className="name";
+  name.textContent = st.name;
+
+  meta.appendChild(name);
+  L.appendChild(img);
+  L.appendChild(meta);
+
+  const btn = document.createElement('button');
+  btn.textContent="▶ پخش";
+
+  box.appendChild(L);
+  box.appendChild(btn);
+
+  box.onclick = ()=> play(st, btn);
+  btn.onclick = e=>{ e.stopPropagation(); play(st, btn); };
+
+  return box;
+}
+
+stations.forEach(s=>{
+  const el = makeEl(s);
+  if(s.lang==="fa") cat_fa.appendChild(el);
+  else cat_tr.appendChild(el);
+});
+
+/* ===== Audio ===== */
+const audio = new Audio();
+audio.crossOrigin="anonymous";
+audio.volume=1;
+let currentBtn=null;
+let currentStation=null;
+
 const nowPlaying = document.getElementById('nowPlaying');
 const volume = document.getElementById('volume');
 const stopBtn = document.getElementById('stopBtn');
 
-const audio = new Audio();
-audio.crossOrigin = "anonymous";
-audio.preload = "none";
-audio.volume = parseFloat(volume.value);
-
-/* render station elements */
-function makeStationElement(st){
-  const el = document.createElement('div');
-  el.className = 'station';
-
-  const left = document.createElement('div'); left.className='left';
-  const meta = document.createElement('div'); meta.className='meta';
-  const title = document.createElement('div'); title.className='name'; title.textContent = st.name;
-  meta.appendChild(title);
-
-  if(st.logo){
-    const img = document.createElement('img'); img.src = st.logo; img.alt = st.name;
-    img.onerror = ()=>{ img.style.display='none' };
-    left.appendChild(img);
-  }
-  left.appendChild(meta);
-
-  const btn = document.createElement('button');
-  btn.textContent = '▶ پخش';
-  btn.onclick = (e)=>{ e.stopPropagation(); handlePlay(st, btn); };
-
-  el.appendChild(left);
-  el.appendChild(btn);
-
-  el.onclick = ()=> handlePlay(st, btn);
-  return el;
-}
-
-stations.forEach(s=>{
-  const node = makeStationElement(s);
-  if(s.lang === 'fa') cat_fa.appendChild(node);
-  else cat_tr.appendChild(node);
-});
-
-/* playback management */
-let currentStation = null;
-let currentButton = null;
-
-function handlePlay(st, btn){
-  if(currentStation && currentStation.url === st.url && !audio.paused){
+function play(st, btn){
+  if(currentStation && currentStation.url===st.url && !audio.paused){
     audio.pause();
-    btn.textContent = '▶ پخش';
-    nowPlaying.textContent = 'هیچ رادیویی انتخاب نشده';
+    btn.textContent="▶ پخش";
+    nowPlaying.textContent="هیچ رادیویی انتخاب نشده";
     return;
   }
 
   audio.src = st.url;
-  audio.play().catch(err=>{
-    console.warn('play failed:', err);
-    alert('پخش ناموفق: مرورگر یا لینک استریم مشکل دارد. یکبار روی صفحه کلیک کنید تا اجازهٔ پخش داده شود یا لینک را چک کن.');
-  });
+  audio.play();
 
-  if(currentButton) currentButton.textContent = '▶ پخش';
-  btn.textContent = '⏸️ توقف';
+  if(currentBtn) currentBtn.textContent="▶ پخش";
+  btn.textContent="⏸ توقف";
+
+  currentBtn = btn;
   currentStation = st;
-  currentButton = btn;
-  nowPlaying.textContent = 'در حال پخش: ' + st.name;
+  nowPlaying.textContent="در حال پخش: "+st.name;
 }
 
-/* controls */
-volume.addEventListener('input', ()=>{ audio.volume = parseFloat(volume.value); });
-stopBtn.addEventListener('click', ()=>{
+volume.oninput = ()=> audio.volume = volume.value;
+stopBtn.onclick = ()=>{
   audio.pause();
-  if(currentButton) currentButton.textContent = '▶ پخش';
-  nowPlaying.textContent = 'هیچ رادیویی انتخاب نشده';
-});
+  if(currentBtn) currentBtn.textContent="▶ پخش";
+  nowPlaying.textContent="هیچ رادیویی انتخاب نشده";
+};
 
-/* ============ Theme & Accent color handling ============ */
-
+/* ===== Theme ===== */
 const modeBtn = document.getElementById('modeBtn');
 const modeIcon = document.getElementById('modeIcon');
 const modeText = document.getElementById('modeText');
-const swatches = Array.from(document.querySelectorAll('.color-swatch'));
+const THEME_KEY="theme";
 
-const THEME_KEY = 'ra_theme_mode'; // 'dark' or 'light'
-const ACCENT_KEY = 'ra_accent_color'; // hex
-
-function applyTheme(theme){
-  if(theme === 'light'){
-    document.documentElement.style.setProperty('--bg', '#f5f6f7');
-    document.documentElement.style.setProperty('--card', '#ffffff');
-    document.documentElement.style.setProperty('--text', '#111827');
-    document.documentElement.style.setProperty('--header', '#ffffff');
-    document.documentElement.style.setProperty('--muted', 'rgba(0,0,0,0.06)');
-    modeIcon.textContent = '☀️';
-    modeText.textContent = 'لایت';
-    modeBtn.classList.add('active');
-  } else {
-    document.documentElement.style.setProperty('--bg', '#121212');
-    document.documentElement.style.setProperty('--card', '#1d1d1d');
-    document.documentElement.style.setProperty('--text', '#eee');
-    document.documentElement.style.setProperty('--header', '#151515');
-    document.documentElement.style.setProperty('--muted', 'rgba(255,255,255,0.06)');
-    modeIcon.textContent = '🌙';
-    modeText.textContent = 'دارک';
-    modeBtn.classList.remove('active');
-  }
-  localStorage.setItem(THEME_KEY, theme);
+function applyLight(){
+  document.documentElement.style.setProperty('--bg','#e5e7eb');
+  document.documentElement.style.setProperty('--card','#f3f4f6');
+  document.documentElement.style.setProperty('--text','#1f2937');
+  document.documentElement.style.setProperty('--header','#f3f4f6');
+  document.documentElement.style.setProperty('--muted','rgba(0,0,0,0.08)');
+  modeIcon.textContent="☀️";
+  modeText.textContent="لایت";
+  modeBtn.classList.add("active");
+  localStorage.setItem(THEME_KEY,"light");
+}
+function applyDark(){
+  document.documentElement.style.setProperty('--bg','#121212');
+  document.documentElement.style.setProperty('--card','#1d1d1d');
+  document.documentElement.style.setProperty('--text','#eee');
+  document.documentElement.style.setProperty('--header','#151515');
+  document.documentElement.style.setProperty('--muted','rgba(255,255,255,0.06)');
+  modeIcon.textContent="🌙";
+  modeText.textContent="دارک";
+  modeBtn.classList.remove("active");
+  localStorage.setItem(THEME_KEY,"dark");
 }
 
-/* accent color setter */
-function applyAccent(hex){
-  document.documentElement.style.setProperty('--accent', hex);
-  // also update any UI that depends on accent (button borders etc.)
-  // highlight selected swatch
-  swatches.forEach(s=>{
-    if(s.dataset.color.toLowerCase() === hex.toLowerCase()) s.classList.add('selected');
-    else s.classList.remove('selected');
-  });
-  localStorage.setItem(ACCENT_KEY, hex);
+if(localStorage.getItem(THEME_KEY)==="light") applyLight();
+else applyDark();
+
+modeBtn.onclick = ()=>{
+  if(localStorage.getItem(THEME_KEY)==="light") applyDark();
+  else applyLight();
+};
+
+/* ===== Accent Colors ===== */
+const swatches = [...document.querySelectorAll('.color-swatch')];
+const ACCENT_KEY="accent";
+function applyAccent(c){
+  document.documentElement.style.setProperty('--accent', c);
+  swatches.forEach(s=>s.classList.remove("selected"));
+  swatches.find(s=>s.dataset.color===c).classList.add("selected");
+  localStorage.setItem(ACCENT_KEY,c);
 }
+const savedAccent = localStorage.getItem(ACCENT_KEY) || "#00ffa6";
+applyAccent(savedAccent);
 
-/* initial load */
-(function initThemeAndAccent(){
-  const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
-  const savedAccent = localStorage.getItem(ACCENT_KEY) || getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00ffa6';
-  applyTheme(savedTheme);
-  applyAccent(savedAccent);
-})();
-
-modeBtn.addEventListener('click', ()=>{
-  const current = localStorage.getItem(THEME_KEY) || 'dark';
-  const next = current === 'dark' ? 'light' : 'dark';
-  applyTheme(next);
-});
-
-/* swatch clicks */
 swatches.forEach(s=>{
-  s.addEventListener('click', ()=>{
-    const c = s.dataset.color;
-    applyAccent(c);
-  });
+  s.onclick = ()=> applyAccent(s.dataset.color);
 });
 
-/* ============ Equalizer (WebAudio) ============ */
-const eq = document.getElementById('eq');
-const eqCtx = eq.getContext('2d');
+/* ===== Equalizer ===== */
+const eq=document.getElementById('eq');
+const ctx=eq.getContext('2d');
 
-function resizeEq(){
-  const dpr = window.devicePixelRatio || 1;
-  const cssH = parseInt(getComputedStyle(eq).height) || 60;
-  eq.width = Math.floor(window.innerWidth * dpr);
-  eq.height = cssH * dpr;
-  eq.style.width = '100%';
-  eq.style.height = cssH + 'px';
-  eqCtx.setTransform(dpr,0,0,dpr,0,0);
+function resize(){
+  const dpr=window.devicePixelRatio||1;
+  const h=parseInt(getComputedStyle(eq).height);
+  eq.width = eq.clientWidth*dpr;
+  eq.height = h*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
-window.addEventListener('resize', resizeEq);
-resizeEq();
+window.addEventListener('resize',resize);
+resize();
 
-let audioCtx = null, analyser = null, srcNode = null;
-function ensureAudioContext(){
-  if(audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  srcNode = audioCtx.createMediaElementSource(audio);
-  analyser = audioCtx.createAnalyser();
-  analyser.fftSize = 256;
-  srcNode.connect(analyser);
-  analyser.connect(audioCtx.destination);
+let AC=null, AN=null, SRC=null;
+
+function initAC(){
+  if(AC) return;
+  AC = new AudioContext();
+  SRC = AC.createMediaElementSource(audio);
+  AN = AC.createAnalyser();
+  AN.fftSize = 256;
+  AN.smoothingTimeConstant = 0.55;
+  SRC.connect(AN);
+  AN.connect(AC.destination);
 }
 
-/* draw loop uses CSS --accent var */
+audio.addEventListener("play", ()=> initAC());
+
 function draw(){
   requestAnimationFrame(draw);
 
-  if(!analyser){
-    eqCtx.fillStyle = '#000';
-    const w = eq.clientWidth, h = eq.clientHeight;
-    eqCtx.fillRect(0,0,w,h);
+  if(!AN){
+    ctx.fillStyle="#000";
+    ctx.fillRect(0,0,eq.clientWidth,eq.clientHeight);
     return;
   }
 
-  const bufferLength = analyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-  analyser.getByteFrequencyData(dataArray);
+  const buf=AN.frequencyBinCount;
+  const arr=new Uint8Array(buf);
+  AN.getByteFrequencyData(arr);
 
-  const cssW = eq.clientWidth;
-  const cssH = eq.clientHeight;
-  eqCtx.fillStyle = '#000';
-  eqCtx.fillRect(0,0,cssW,cssH);
+  const usable = Math.floor(buf*0.80); // skip last 20%
 
-  const barWidth = (cssW / bufferLength) * 2.2;
-  let x = 0;
+  const w=eq.clientWidth;
+  const h=eq.clientHeight;
+  ctx.fillStyle="#000";
+  ctx.fillRect(0,0,w,h);
 
-  // read accent color from CSS var each frame (so changes apply immediately)
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#00ffa6';
-  for(let i=0;i<bufferLength;i++){
-    let raw = dataArray[i] / 255;
-    let scaled = Math.min(raw, 1.0) * 0.7;
-    let v = scaled * cssH;
+  const accent=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
 
-    eqCtx.fillStyle = accent;
-    eqCtx.fillRect(x, cssH - v, barWidth, v);
+  const barW=(w/usable)*1.8;
+  let x=0;
 
-    x += barWidth + 1;
+  for(let i=0;i<usable;i++){
+    const v = (arr[i]/255)*h;
+    ctx.fillStyle=accent;
+    ctx.fillRect(x,h-v,barW,v);
+    x+=barW+1;
   }
 }
 draw();
-
-/* create AudioContext on first user-initiated play */
-audio.addEventListener('play', ()=>{
-  try{ ensureAudioContext(); }catch(e){ console.warn(e) }
-});
 </script>
 </body>
 </html>
