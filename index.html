@@ -38,21 +38,30 @@ body{
 .title{font-size:20px}
 
 /* iOS switch */
-.switch{
-  width:46px;height:24px;
+.switch {
+  width:56px; height:26px;
   border-radius:50px;
   background:#555;
   position:relative;
   cursor:pointer;
   transition:.25s;
+  display:flex;
+  align-items:center;
+  padding:0 6px;
 }
-.switch-circle{
-  width:20px;height:20px;
-  background:white;
-  border-radius:50%;
-  position:absolute;
-  top:2px;left:2px;
+
+.switch-icon {
+  font-size:14px;
+  color:white;
+  pointer-events:none;
   transition:.25s;
+  position:absolute;
+  left:8px;
+}
+
+.switch.on .switch-icon {
+  left:auto;
+  right:8px;
 }
 .switch.on{background:var(--accent)}
 .switch.on .switch-circle{left:24px}
@@ -168,8 +177,9 @@ body{
 
   <div style="display:flex;align-items:center;gap:14px">
     <div id="themeSwitch" class="switch">
-      <div class="switch-circle"></div>
-    </div>
+  <div class="switch-icon">🌙</div>
+  <div class="switch-circle"></div>
+</div>
 
     <div class="color-picker" id="colorPicker">
       <div class="color-swatch selected" data-color="#00ffa6" style="background:#00ffa6"></div>
@@ -475,7 +485,7 @@ const switchEl = document.getElementById("themeSwitch");
 
 function setDarkMode(on){
   switchEl.classList.toggle("on", on);
-
+  document.querySelector(".switch-icon").textContent = on ? "🌙" : "☀️";
   if(on){
     document.documentElement.style.setProperty("--bg", "#121212");
     document.documentElement.style.setProperty("--card", "#1d1d1d");
