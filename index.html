@@ -309,7 +309,9 @@ const channelsFA = [
 
 function createList(list, target){
   target.innerHTML = "";
-  list.forEach((ch, index)=>{
+  list.forEach(ch=>{
+    const id = "btn_" + ch.name.replace(/\s+/g,"_");
+
     const el = document.createElement("div");
     el.className="station";
 
@@ -318,12 +320,14 @@ function createList(list, target){
         <img src="${ch.logo}" referrerpolicy="no-referrer">
         <div class="name">${ch.name}</div>
       </div>
-      <button id="btn_${ch.name.replace(/\\s+/g,'_')}">▶ پخش</button>
+      <button id="${id}">پخش</button>
     `;
-    el.querySelector("button").onclick = ()=>toggleChannel(ch);
+
+    el.querySelector("button").onclick = ()=> toggleChannel(ch);
     target.appendChild(el);
   });
 }
+
 
 createList(channelsTR, document.getElementById("cat_tr"));
 createList(channelsFA, document.getElementById("cat_fa"));
