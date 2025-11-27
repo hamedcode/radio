@@ -14,6 +14,18 @@
   --header:#151515;
   --muted:rgba(255,255,255,0.06);
 }
+
+/* light theme vars (will be applied via [data-theme="light"]) */
+:root[data-theme="light"]{
+  --bg:#e3f4ff;     
+  --card:#f0f9ff;    
+  --header:#ffffff;
+  --text:#0b1220;
+  --muted:rgba(0,0,0,0.08);
+  --station-border: 1px solid rgba(0,0,0,0.12); /* حاشیه مشکی ملایم برای باکس‌های هر کانال */
+}
+
+/* defaults */
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -63,7 +75,7 @@ body{
   left:auto;
   right:8px;
 }
-.switch.on{background:var(--accent)}
+.switch.on{background:#fff}
 .switch.on .switch-circle{left:24px}
 
 /* Color picker */
@@ -76,7 +88,7 @@ body{
 }
 .color-swatch.selected{
   outline:2px solid #fff;
-  transform:scale(1.1);
+  transform:scale(1.08);
 }
 
 /* ===== CHANNEL LIST ===== */
@@ -95,8 +107,10 @@ body{
   border-radius:8px;
   margin-bottom:12px;
   font-size:18px;
+  border:1px solid transparent;
 }
 
+/* station list */
 .station-list{
   display:flex;
   flex-direction:column;
@@ -110,15 +124,20 @@ body{
   display:flex;
   justify-content:space-between;
   cursor:pointer;
+  align-items:center;
+  transition:.12s;
+  /* border in light theme applied via CSS variable */
+  border: var(--station-border, 0);
 }
-.station:hover{background:rgba(255,255,255,0.05)}
+.station:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,0.18)}
 .left{display:flex;align-items:center;gap:12px}
 .station img{
   width:44px;height:44px;
   border-radius:6px;
   object-fit:cover;
+  background:rgba(0,0,0,0.06);
 }
-.name{font-weight:600}
+.name{font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .station button{
   background:var(--accent);
@@ -129,7 +148,9 @@ body{
   text-align:center;
   cursor:pointer;
   color:#000;
+  transition:transform .08s;
 }
+.station button:active{ transform:scale(.98) }
 
 /* ===== PLAYER ===== */
 .player-box{
@@ -160,6 +181,7 @@ body{
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
+  font-weight:600;
 }
 
 @media(max-width:900px){
@@ -176,12 +198,12 @@ body{
   <div class="title">🎧 رادیو آنلاین</div>
 
   <div style="display:flex;align-items:center;gap:14px">
-    <div id="themeSwitch" class="switch">
-  <div class="switch-icon">🌙</div>
-  <div class="switch-circle"></div>
-</div>
+    <div id="themeSwitch" class="switch" title="تغییر حالت">
+      <div class="switch-icon">🌙</div>
+      <div class="switch-circle"></div>
+    </div>
 
-    <div class="color-picker" id="colorPicker">
+    <div class="color-picker" id="colorPicker" title="تغییر رنگ تم">
       <div class="color-swatch selected" data-color="#00ffa6" style="background:#00ffa6"></div>
       <div class="color-swatch" data-color="#00aaff" style="background:#00aaff"></div>
       <div class="color-swatch" data-color="#ffcc00" style="background:#ffcc00"></div>
@@ -206,165 +228,182 @@ body{
 
 <!-- PLAYER -->
 <div class="player-box">
-  <canvas id="eq"></canvas>
+  <canvas id="eq" aria-hidden="true"></canvas>
 
   <div class="player-controls">
     <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
 
-    حجم:
-    <input id="volume" type="range" min="0" max="1" value="1" step="0.01">
+    <label style="display:flex;align-items:center;gap:8px">حجم:
+      <input id="volume" type="range" min="0" max="1" value="1" step="0.01" style="width:140px">
+    </label>
 
     <button id="stopBtn">⏹ توقف</button>
   </div>
 </div>
 
+<!-- HLS.JS -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
 <script>
 /* ====================== */
 /*      CHANNEL DATA      */
+/*  (شامل نام، لینک پخش و لوگو) */
 /* ====================== */
+
 const channelsTR = [
   { name:"Arabesk Efsane FM",
     url:"https://stream.zeno.fm/x5n4sfyy9nhvv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/6PGFwWVgLll3f4INzxVqlwdjpOfStwE2wVTFu6GDrzw/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0l6YVR3dndnTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0lfYi1XNFFrTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY4NTE3MjE5NTAwMA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Arabesk_Efsane_FM.webp"
   },
-
+  { name:"Radio Veten",
+    url:"https://stream.zeno.fm/0kgkkzanmueuv",
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_veten.png"
+  },
   { name:"İZNİK FM",
     url:"https://stream.zeno.fm/4crdx4nukrnuv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/cbY5lyYrOd6Dy6Dor1DhLsqTzzfB4I8-0dwyooRgQa4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvNzkwYTBjYjctYTMwMC00ODRjLWI2ZjItMTg5YmNjOWFjNmM1L2ltYWdlLz91PTE3NjI2ODg4ODIwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/%C4%B0ZN%C4%B0K_FM.webp"
   },
-
   { name:"Radyo Nostaljinin Sesi",
     url:"https://stream.zeno.fm/q7zxyx2qsfhvv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/C40EP-w5lbCEjhD3OEXoLH0mqT4QAjoi3HcMlrdprM0/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0F4SkdkdkFzTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0k2b3FmX3drTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY4NjQ5NTUzMzAwMA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radyo_Nostaljinin_Sesi.webp"
   },
-
   { name:"Arabeskin Merkazİ",
     url:"https://canli.arabeskinmerkezi.com/9180/stream",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/UBQlE7LkPyb1LyisrVkS28F-iyqkolXqUCF0GSBe7q4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYTgyNzg4YjctYjk1ZS00ODBhLTgyZGUtODg2YzUyMmYyYzNmL2ltYWdlLz91PTE3MDE2OTY2NDAwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio.webp"
   },
-
   { name:"Azad Azərbaycan radiosu",
     url:"https://radio.fnvm.workers.dev/?url=https%3A%2F%2Faudiostr.atv.az%2F106.3fm",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/UBQlE7LkPyb1LyisrVkS28F-iyqkolXqUCF0GSBe7q4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYTgyNzg4YjctYjk1ZS00ODBhLTgyZGUtODg2YzUyMmYyYzNmL2ltYWdlLz91PTE3MDE2OTY2NDAwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio.webp"
   },
-  
   { name:"Yurd FM",
     url:"https://radio.fnvm.workers.dev/?url=https%3A%2F%2Ficecast.livetv.az%2Fyurdfm",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/UBQlE7LkPyb1LyisrVkS28F-iyqkolXqUCF0GSBe7q4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYTgyNzg4YjctYjk1ZS00ODBhLTgyZGUtODg2YzUyMmYyYzNmL2ltYWdlLz91PTE3MDE2OTY2NDAwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio.webp"
   },
-
   { name:"ARAS RADIO",
     url:"https://stream.zeno.fm/dkq2vwpuqf0uv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/tYMUUWuJS9KQEGfSRhxgFlnUmU7jhxT13xYZNss_4BA/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvMDgxNzM0ZDUtODc4MS00M2YzLWEzZmItNWFkYzkwOTU4ODliL2ltYWdlLz91PTE3MTM3ODE1MjAwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/ARAS_RADIO.webp"
   },
-
   { name:"Arabesk ON7",
     url:"https://stream.zeno.fm/kd3h0p1qcphvv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/-rmsjJF9vcR8B5-oVkTNyxuqfkaMi7ei-5ZdOqfEvck/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0luY185NkFnTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0lrX3FRbHdvTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTcyOTg2NTgzNzAwMA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Arabesk_ON7.webp"
   },
-
   { name:"Karaviran FM",
     url:"https://stream.zeno.fm/wfd8v2rsywzuv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/cCmkCoaK6IOTfoWv1o41bgG-48gthcV75QdeIZoITI0/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ1E5TGpudFFrTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ1F0TmFjX0FzTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY2NzE2MjQ5MTAwMA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Karaviran_FM.webp"
   },
-  
   { name:"Naxçıvan Radiosu",
     url:"http://s33.myradiostream.com:12782/listen.mp3",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/qpsO_iNA8aGqsKrXHX0fUneE_f0gUl1kqYwilPn2HD4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvMjlmNzI0NTEtOWM2Ny00YzgxLWE0MTMtMWFlODJjYTM2ZWY4L2ltYWdlLz91PTE3MDE2OTY4MDYwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Nax%C3%A7%C4%B1van%20Radiosu.webp"
   }
 ];
-
 
 
 const channelsFA = [
   { name:"Radio Hamrah",
     url:"https://stream.zeno.fm/euutwhsru2wtv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/QXH8sr3xE8WGEbYBpaNlPpoAuEMKqcEoFDAZOS_fixI/rs:fill:256:256/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlHd3NTRGxOMFlYUnBiMjVRY205bWFXeGxHSUNBZ0lEUDd0b0tES0lCQkhwbGJtOC9pbWFnZS8_dT0xNjcyMzAxMjY3MDAw.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Hamrah.webp"
   },
-
   { name:"Radio Yar",
     url:"https://stream.zeno.fm/oyb5oh6ne3tuv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/kw4YYJRvsl-DswchOsWr3Vtz1MnLY8gfkPAf_FSMgyo/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvMWRjZmJjMzktYzM4NS00OTg3LWE5ZTQtYTFiMjE0NDAzZDg3L2ltYWdlLz91PTE3MjgzOTk2MzcwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Yar.webp"
   },
-
   { name:"KIRN 670",
     url:"https://stream.zeno.fm/16gxgv7ch5zuv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/YJygcpY0wJ-ORl7yrs57txbWABe87n5INuAERhqfRXk/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJQ0F0NWZQcWdvTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJQ0F3TW00akFvTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY2MTI4MjY5MzAwMA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/KIRN%20670.webp"
   },
-
-  { name:"RADIO SIMORGH",
+  { name:"RADIO SIMORGH music",
     url:"https://stream.zeno.fm/9svfnobkrxrvv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/eNYSMBmJNoW6_hcdkosiReSKOx7HHLAn7fP6Tso3DWc/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvMjAxZGE3MmItNWFhYy00OWU5LWEzN2YtM2IzYjZjZjZmZjQxL2ltYWdlLz91PTE3NjMxNjAxMzcwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_simorgh1.jpg"
   },
-
+  
+  { name:"RADIO SIMORGH",
+    url:"https://stream.zeno.fm/jl8n7thgcdftv",
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_simorgh2.jpg"
+  },
   { name:"Radio Yar Plus",
     url:"https://stream.zeno.fm/2jwyo983y49vv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/7XCVsr_ZE1q3fpPcrCpQD1prYmMrjHoCWo2u7sHhGYU/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvZDYxZWM4ZjMtZTI1NC00ODBmLWE1NzAtNTZhNjYxYjY0ZTllL2ltYWdlLz91PTE3MzgxNTc4NTMwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Yar_Plus.webp"
   },
-
   { name:"Radio Avang Club",
     url:"https://stream.zeno.fm/fpabqr8pd9zuv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/acnY7ntKys9h-2AhQvRWpVDUV0WY3Kh-Jfb8rkjNuH4/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvNTBmMmVlYjAtNzVkOC00YTllLTlkNWYtZjY1YjkwYjk3MDQ2L2ltYWdlLz91PTE3MzY4NDYwMzEwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Avang_Club.webp"
   },
-
   { name:"Radio Farsi London",
     url:"https://stream.zeno.fm/c3kkavhhzd0uv",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/-YxtmG_1FTNyGCT_8g7soWRiEMvzx7HNLWvs57CcbIw/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvYWd4emZucGxibTh0YzNSaGRITnlNZ3NTQ2tGMWRHaERiR2xsYm5RWWdJREFqUHZXa0FnTUN4SU9VM1JoZEdsdmJsQnliMlpwYkdVWWdJRFEybzJKdVFvTW9nRUVlbVZ1YncvaW1hZ2UvP3U9MTY3ODA2MTQ1MDAwMA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Farsi_London.webp"
   },
-
   { name:"Radio Darbast",
     url:"https://live.radiodarbast.com/stream.mp3",
-    logo:"https://www.sedaye-iran.online/assets/images/emblems/radio_darbast.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Darbast.webp"
   },
-
   { name:"Radio Arina",
     url:"https://s5.voscast.com:10205/stream",
-    logo:"https://www.sedaye-iran.online/assets/images/emblems/radio_arina.jpg"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Arina.jpg"
   },
-
   { name:"Radio Khatereh",
     url:"https://s-us1.srv-control.com:5727/stream?tag=rk6qr",
-    logo:"https://www.sedaye-iran.online/assets/images/emblems/radio_khatereh.png"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Khatereh.png"
   },
-
   { name:"Radio Sarcheshmeh",
     url:"https://sarcheshmeh.awsvps.com/stream",
-    logo:"https://www.sedaye-iran.online/assets/images/emblems/radio_sarcheshmeh.png"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Sarcheshmeh.png"
   },
-
   { name:"Radio JiBi",
     url:"https://stream.radiojar.com/pk8rnhvtuy8uv",
-    logo:"https://www.sedaye-iran.online/assets/images/emblems/radio_ji_bi.png"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_JiBi.png"
   },
-
   { name:"Radio Salmak",
     url:"https://stream.radiojar.com/atdbyqwr8vuvv",
     logo:"https://www.sedaye-iran.online/assets/images/emblems/radio_salmak.png"
   },
-
-    { name:"Radio AVA Istanbul",
+  { name:"Radio AVA Istanbul",
     url:"https://play.markaradyo.com:8002/stream",
-    logo:"https://www.sedaye-iran.online/assets/images/emblems/radio_ava_istanbul.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_AVA_Istanbul.webp"
+  },
+  { name:"Radio Iran IRIB",
+    url:"https://s2.cdn1.iranseda.ir/liveedge/radio-iran/playlist.m3u8",
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_iran_irib.webp"
+  },
+  
+  { name:"Radio Javan IRIB",
+    url:"https://s6.cdn3.iranseda.ir/liveedge/radio-javan/playlist.m3u8",
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio-javan.jpg"
+  },
+  
+  { name:"Radio AVA IRIB",
+    url:"https://s0.cdn1.iranseda.ir/liveedge/radio-avaa/playlist.m3u8",
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_ava_irib.webp"
+  },
+  
+  { name:"Radio Payam IRIB",
+    url:"https://s1.cdn3.iranseda.ir/liveedge/radio-payam/playlist.m3u8",
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_payam_irib.webp"
+  },
+  
+  { name:"Radio Varzesh IRIB",
+    url:"https://s0.cdn1.iranseda.ir/liveedge/radio-varzesh/playlist.m3u8",
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_varzesh_irib.webp"
   },
   
   { name:"Radio Shadi",
     url:"https://ice9.securenetsystems.net/SHADI",
-    logo:"https://zeno.fm/_ipx/_/https://images.zeno.fm/NRIGBcOzqWFUZZ4dhVZ3bp6oKMftJTpniyrmgru7dZM/rs:fill:288:288/g:ce:0:0/aHR0cHM6Ly9wcm94eS56ZW5vLmZtL2NvbnRlbnQvc3RhdGlvbnMvOGUyZDcwMjUtMmZhMC00MDU5LWFmNGMtMDg0ZjA1NmZjOTk4L2ltYWdlLz91PTE3MDE2OTc1OTEwMDA.webp"
+    logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Shadi.webp"
   }
 ];
 
-
+/* =========================
+   UI / List rendering
+   ========================= */
 function createList(list, target){
   target.innerHTML = "";
   list.forEach(ch=>{
-    const id = "btn_" + ch.name.replace(/\s+/g,"_");
-
+    const id = "btn_" + ch.name.replace(/\s+/g,"_").replace(/[^\w\-]/g,"");
     const el = document.createElement("div");
     el.className="station";
 
     el.innerHTML = `
       <div class="left">
-        <img src="${ch.logo}" referrerpolicy="no-referrer">
+        <img src="${ch.logo}" referrerpolicy="no-referrer" alt="${ch.name} logo">
         <div class="name">${ch.name}</div>
       </div>
       <button id="${id}">▶ پخش</button>
@@ -374,7 +413,6 @@ function createList(list, target){
     target.appendChild(el);
   });
 }
-
 
 createList(channelsTR, document.getElementById("cat_tr"));
 createList(channelsFA, document.getElementById("cat_fa"));
@@ -390,17 +428,14 @@ let audioCtx = null;
 let analyser = null;
 let sourceNode = null;
 let dataArray = null;
-
 let userGesture = false;
 
 function ensureAudioContext(){
   if(!audioCtx){
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 64;
-
+    analyser.fftSize = 128;
     dataArray = new Uint8Array(analyser.frequencyBinCount);
-
     sourceNode = audioCtx.createMediaElementSource(audio);
     sourceNode.connect(analyser);
     analyser.connect(audioCtx.destination);
@@ -416,48 +451,68 @@ document.addEventListener("click", ()=>{
   }
 }, {once:true});
 
+
 /* ==================================== */
 /*        PLAYER CONTROL LOGIC          */
 /* ==================================== */
 
 let currentChannel = null;
 
-/* Sync button states */
 function updateButtons(){
   document.querySelectorAll(".station button").forEach(btn=>{
-    const txt = btn.innerText;
     btn.innerText = "▶ پخش";
   });
 
   if(currentChannel){
-    const id = "btn_" + currentChannel.name.replace(/\s+/g,"_");
+    const id = "btn_" + currentChannel.name.replace(/\s+/g,"_").replace(/[^\w\-]/g,"");
     const btn = document.getElementById(id);
     if(btn) btn.innerText = "⏹ توقف";
   }
 }
 
-/* Main toggle */
-function toggleChannel(ch){
-  if(!userGesture){
-    ensureAudioContext();
-  }
+/* ============ M3U8 + toggleChannel ============ */
 
+function toggleChannel(ch){
+  if(!userGesture) ensureAudioContext();
+
+  // اگر همان کانال در حال پخش است -> متوقفش کن
   if(currentChannel && currentChannel.url === ch.url && !audio.paused){
     audio.pause();
     audio.src = "";
     currentChannel = null;
+    if(window.hls){ window.hls.destroy(); window.hls = null; }
     document.getElementById("nowPlaying").innerText = "هیچ رادیویی انتخاب نشده";
     updateButtons();
     return;
   }
 
   currentChannel = ch;
-  audio.src = ch.url;
 
-  ensureAudioContext();
-  if(audioCtx.state === "suspended") audioCtx.resume();
-
-  audio.play().catch(e=>console.log("play error:",e));
+  // اگر لینک m3u8 است و hls.js پشتیبانی می‌شود
+  try {
+    const isM3U8 = typeof ch.url === "string" && ch.url.toLowerCase().includes(".m3u8");
+    if (window.Hls && Hls.isSupported() && isM3U8) {
+      if(window.hls){ window.hls.destroy(); window.hls = null; }
+      window.hls = new Hls();
+      window.hls.loadSource(ch.url);
+      window.hls.attachMedia(audio);
+      window.hls.on(Hls.Events.MANIFEST_PARSED, ()=> {
+        // resume audio context if needed
+        if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+        audio.play().catch(e=>console.log("play error hls:", e));
+      });
+    } else {
+      // fallback: مستقیم به audio.src
+      if(window.hls){ window.hls.destroy(); window.hls = null; }
+      audio.src = ch.url;
+      if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+      audio.play().catch(e=>console.log("play error src:", e));
+    }
+  } catch(err){
+    console.log("toggleChannel error:", err);
+    // fallback safe
+    try{ audio.src = ch.url; audio.play().catch(()=>{}); }catch(e){}
+  }
 
   document.getElementById("nowPlaying").innerText = ch.name;
   updateButtons();
@@ -468,6 +523,7 @@ document.getElementById("stopBtn").onclick = ()=>{
   audio.pause();
   audio.src = "";
   currentChannel = null;
+  if(window.hls){ window.hls.destroy(); window.hls = null; }
   document.getElementById("nowPlaying").innerText = "هیچ رادیویی انتخاب نشده";
   updateButtons();
 };
@@ -521,18 +577,25 @@ const switchEl = document.getElementById("themeSwitch");
 function setDarkMode(on){
   switchEl.classList.toggle("on", on);
   document.querySelector(".switch-icon").textContent = on ? "🌙" : "☀️";
+  // set data-theme on root so CSS can react (e.g. station border)
+  document.documentElement.setAttribute("data-theme", on ? "dark" : "light");
+
   if(on){
     document.documentElement.style.setProperty("--bg", "#121212");
     document.documentElement.style.setProperty("--card", "#1d1d1d");
     document.documentElement.style.setProperty("--header", "#151515");
     document.documentElement.style.setProperty("--text", "#eee");
     document.documentElement.style.setProperty("--muted","rgba(255,255,255,0.06)");
+    document.documentElement.style.setProperty("--station-border","0");
   } else {
+    // light (not too white)
     document.documentElement.style.setProperty("--bg", "#e3f4ff");
     document.documentElement.style.setProperty("--card", "#f0f9ff");
     document.documentElement.style.setProperty("--header", "#ffffff");
-    document.documentElement.style.setProperty("--text", "#000");
+    document.documentElement.style.setProperty("--text", "#0b1220");
     document.documentElement.style.setProperty("--muted","rgba(0,0,0,0.08)");
+    // add subtle black border for stations
+    document.documentElement.style.setProperty("--station-border","1px solid rgba(0,0,0,0.12)");
   }
 }
 
@@ -544,14 +607,17 @@ switchEl.onclick = ()=>{
 /* Default = Dark */
 setDarkMode(true);
 
-/* Accent color */
+/* Accent color picker */
 document.querySelectorAll(".color-swatch").forEach(sw=>{
   sw.onclick = ()=>{
     document.querySelectorAll(".color-swatch").forEach(s=>s.classList.remove("selected"));
     sw.classList.add("selected");
-
     const col = sw.dataset.color;
     document.documentElement.style.setProperty("--accent", col);
+    // update player border color too
+    document.querySelectorAll(".player-box, .station button").forEach(el=>{
+      // no direct color change needed because CSS reads --accent; kept for completeness
+    });
   };
 });
 </script>
