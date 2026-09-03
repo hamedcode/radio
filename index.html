@@ -114,6 +114,27 @@ a{color:inherit}
 
 .topbar-controls{display:flex;align-items:center;gap:16px;flex:none}
 
+.install-btn{
+  display:flex;align-items:center;gap:6px;
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:700;
+  color:#1a1204;
+  background:linear-gradient(180deg, var(--accent), var(--accent-dark));
+  border:none;
+  border-radius:50px;
+  padding:8px 14px;
+  cursor:pointer;
+  box-shadow:0 3px 10px var(--accent-soft);
+  transition:transform .12s ease;
+}
+.install-btn svg{width:15px;height:15px}
+.install-btn:active{transform:scale(.96)}
+.install-btn[hidden]{display:none}
+@media(max-width:640px){
+  .install-btn span{display:none}
+}
+
 /* theme switch, restyled as a tuner rocker */
 .switch {
   width:54px; height:28px;
@@ -270,6 +291,9 @@ a{color:inherit}
   .cols{flex-direction:column;margin-bottom:245px;padding:14px}
   .tagline{display:none}
 }
+@media(max-width:640px){
+  .cols{margin-bottom:300px}
+}
 @media(max-width:520px){
   .name{max-width:150px}
 }
@@ -393,12 +417,19 @@ input[type="range"]#volume::-moz-range-track{height:4px;border-radius:3px;backgr
 
 @media(max-width:760px){
   .player-inner{gap:12px}
-  .now-wrap{max-width:110px}
-  .volume-wrap{width:110px}
+  .now-wrap{max-width:150px}
+  .volume-wrap{width:130px}
 }
-@media(max-width:560px){
-  .now-wrap{display:none}
+
+/* Portrait phones: everything in one row no longer fits, so the
+   "now playing" status wraps onto its own full-width line above the
+   transport button / equalizer / volume row, instead of being hidden. */
+@media(max-width:640px){
+  .player-inner{flex-wrap:wrap; row-gap:10px}
+  .now-wrap{order:-1; flex:1 1 100%; max-width:none; min-width:100%}
+  .volume-wrap{width:120px}
 }
+
 </style>
 </head>
 
@@ -428,6 +459,11 @@ input[type="range"]#volume::-moz-range-track{height:4px;border-radius:3px;backgr
   </div>
 
   <div class="topbar-controls">
+    <button id="installBtn" class="install-btn" hidden>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"></path></svg>
+      <span>نصب اپلیکیشن</span>
+    </button>
+
     <div id="themeSwitch" class="switch" title="تغییر حالت" role="switch" aria-checked="true">
       <div class="switch-icon">🌙</div>
       <div class="switch-circle"></div>
@@ -1006,6 +1042,34 @@ if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(err=>console.log("SW registration failed:", err));
   });
 }
+
+/* Android/Chrome don't always show their own install banner right away —
+   this gives a direct, always-visible way to trigger it once the browser
+   confirms the site meets the installability criteria. iOS Safari never
+   fires this event; iOS users still install manually via Share → "Add to
+   Home Screen", which is unavoidable (Apple doesn't expose this API). */
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById("installBtn");
+
+window.addEventListener("beforeinstallprompt", (e)=>{
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  installBtn.hidden = false;
+});
+
+installBtn.onclick = async ()=>{
+  if(!deferredInstallPrompt) return;
+  installBtn.hidden = true;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+};
+
+window.addEventListener("appinstalled", ()=>{
+  installBtn.hidden = true;
+  deferredInstallPrompt = null;
+});
+
 
 </script>
 </body>
