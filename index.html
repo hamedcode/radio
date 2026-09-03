@@ -80,8 +80,6 @@ a{color:inherit}
   display:flex;
   align-items:center;
   justify-content:space-between;
-  flex-wrap:wrap;
-  row-gap:10px;
   gap:16px;
   padding:14px 20px;
   background:var(--header);
@@ -114,28 +112,34 @@ a{color:inherit}
 .title{font-size:19px;font-weight:800;letter-spacing:.2px;line-height:1.25}
 .tagline{font-size:12.5px;color:var(--muted-text);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.topbar-controls{display:flex;align-items:center;flex-wrap:wrap;row-gap:8px;gap:16px;flex:none}
+.topbar-controls{display:flex;align-items:center;gap:16px;flex:none}
 
+/* Install button now lives in the player bar (see .install-row) so it can
+   always show its full icon + label, matching the desktop appearance,
+   instead of competing for space in the header. */
 .install-btn{
-  display:flex;align-items:center;gap:6px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;
   font-family:inherit;
-  font-size:12.5px;
+  font-size:13.5px;
   font-weight:700;
   color:#1a1204;
   background:linear-gradient(180deg, var(--accent), var(--accent-dark));
   border:none;
-  border-radius:50px;
-  padding:8px 14px;
+  border-radius:10px;
+  padding:10px 14px;
   cursor:pointer;
   box-shadow:0 3px 10px var(--accent-soft);
   transition:transform .12s ease;
 }
-.install-btn svg{width:15px;height:15px}
-.install-btn:active{transform:scale(.96)}
-.install-btn[hidden]{display:none}
-@media(max-width:640px){
-  .install-btn span{display:none}
+.install-btn svg{width:16px;height:16px;flex:none}
+.install-btn:active{transform:scale(.98)}
+
+.install-row{
+  max-width:1100px;
+  margin:0 auto 10px auto;
 }
+.install-row[hidden]{display:none}
 
 /* theme switch, restyled as a tuner rocker */
 .switch {
@@ -377,7 +381,7 @@ a{color:inherit}
 }
 #eq{width:100%;height:100%;display:block}
 
-.volume-wrap{flex:none;display:flex;align-items:center;gap:9px;width:170px}
+.volume-wrap{flex:none;display:flex;align-items:center;gap:9px}
 .mute-btn{
   flex:none;
   width:34px;height:34px;
@@ -395,7 +399,8 @@ a{color:inherit}
 input[type="range"]#volume{
   -webkit-appearance:none;appearance:none;
   direction:ltr; /* keeps native thumb travel (min→max, left→right) in sync with our left-anchored fill, regardless of page RTL */
-  flex:1;
+  flex:none;
+  width:130px;
   height:4px;
   border-radius:3px;
   background:linear-gradient(90deg, var(--accent) var(--vol,100%), var(--line) var(--vol,100%));
@@ -420,17 +425,21 @@ input[type="range"]#volume::-moz-range-track{height:4px;border-radius:3px;backgr
 @media(max-width:760px){
   .player-inner{gap:12px}
   .now-wrap{max-width:150px}
-  .volume-wrap{width:130px}
+  input[type="range"]#volume{width:90px}
 }
 
 /* Portrait phones: everything in one row no longer fits, so the
    "now playing" status wraps onto its own full-width line above the
-   transport button / equalizer / volume row, instead of being hidden. */
+   transport button / equalizer / volume row, instead of being hidden.
+   The mute button and slider keep fixed pixel widths (not flex-shrink)
+   so the icon can never be squeezed out or pushed off-screen. */
 @media(max-width:640px){
   .player-inner{flex-wrap:wrap; row-gap:10px}
   .now-wrap{order:-1; flex:1 1 100%; max-width:none; min-width:100%}
-  .volume-wrap{width:120px}
+  input[type="range"]#volume{width:70px}
+  .eq-wrap{min-width:40px}
 }
+
 
 </style>
 </head>
@@ -461,11 +470,6 @@ input[type="range"]#volume::-moz-range-track{height:4px;border-radius:3px;backgr
   </div>
 
   <div class="topbar-controls">
-    <button id="installBtn" class="install-btn" hidden>
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"></path></svg>
-      <span>نصب اپلیکیشن</span>
-    </button>
-
     <div id="themeSwitch" class="switch" title="تغییر حالت" role="switch" aria-checked="true">
       <div class="switch-icon">🌙</div>
       <div class="switch-circle"></div>
@@ -496,6 +500,12 @@ input[type="range"]#volume::-moz-range-track{height:4px;border-radius:3px;backgr
 
 <!-- PLAYER -->
 <div class="player-box">
+  <div class="install-row" id="installRow" hidden>
+    <button id="installBtn" class="install-btn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"></path></svg>
+      <span>نصب اپلیکیشن</span>
+    </button>
+  </div>
   <div class="player-inner">
     <button class="transport-btn" id="stopBtn" title="توقف" aria-label="توقف پخش">
       <svg id="transportIcon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
@@ -1052,23 +1062,24 @@ if("serviceWorker" in navigator){
    Home Screen", which is unavoidable (Apple doesn't expose this API). */
 let deferredInstallPrompt = null;
 const installBtn = document.getElementById("installBtn");
+const installRow = document.getElementById("installRow");
 
 window.addEventListener("beforeinstallprompt", (e)=>{
   e.preventDefault();
   deferredInstallPrompt = e;
-  installBtn.hidden = false;
+  installRow.hidden = false;
 });
 
 installBtn.onclick = async ()=>{
   if(!deferredInstallPrompt) return;
-  installBtn.hidden = true;
+  installRow.hidden = true;
   deferredInstallPrompt.prompt();
   await deferredInstallPrompt.userChoice;
   deferredInstallPrompt = null;
 };
 
 window.addEventListener("appinstalled", ()=>{
-  installBtn.hidden = true;
+  installRow.hidden = true;
   deferredInstallPrompt = null;
 });
 
