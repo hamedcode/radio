@@ -4,35 +4,75 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>رادیو آنلاین</title>
+<meta name="description" content="پخش زنده ایستگاه‌های رادیویی فارسی، ترکی و آذری">
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='22' width='60' height='36' rx='6' fill='%23181a20'/%3E%3Crect x='2' y='22' width='60' height='36' rx='6' fill='none' stroke='%23f2a33d' stroke-width='2'/%3E%3Cline x1='30' y1='22' x2='14' y2='4' stroke='%23f2a33d' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='14' cy='4' r='3' fill='%23f2a33d'/%3E%3Ccircle cx='18' cy='38' r='9' fill='%230f1014'/%3E%3Ccircle cx='18' cy='38' r='9' fill='none' stroke='%23f2a33d' stroke-width='2'/%3E%3Ccircle cx='18' cy='38' r='2.5' fill='%23f2a33d'/%3E%3Crect x='34' y='30' width='4' height='16' rx='1.5' fill='%23f2a33d'/%3E%3Crect x='41' y='26' width='4' height='20' rx='1.5' fill='%23f2a33d'/%3E%3Crect x='48' y='33' width='4' height='13' rx='1.5' fill='%23f2a33d'/%3E%3C/svg%3E">
+
+<!-- PWA: lets Android/Chrome and iOS offer "Add to Home screen" with a proper app icon -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#121319">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="رادیو آنلاین">
+<meta name="mobile-web-app-capable" content="yes">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#121212;
-  --card:#1d1d1d;
-  --accent:#00ffa6;
-  --text:#eee;
-  --header:#151515;
-  --muted:rgba(255,255,255,0.06);
+  --bg:#121319;
+  --bg-grain:#0e0f14;
+  --card:#1c1e26;
+  --card-hi:rgba(255,255,255,0.04);
+  --accent:#f2a33d;
+  --accent-soft:rgba(242,163,61,0.16);
+  --accent-dark:#c97e1c;
+  --accent-darker:#8a5c11;
+  --text:#f3efe4;
+  --muted-text:#96938a;
+  --header:#16171d;
+  --line:rgba(255,255,255,0.07);
+  --station-border: 1px solid rgba(255,255,255,0.02);
+  --danger:#e2543a;
 }
 
-/* light theme vars (will be applied via [data-theme="light"]) */
 :root[data-theme="light"]{
-  --bg:#e3f4ff;     
-  --card:#f0f9ff;    
-  --header:#ffffff;
-  --text:#0b1220;
-  --muted:rgba(0,0,0,0.08);
-  --station-border: 1px solid rgba(0,0,0,0.12); /* حاشیه مشکی ملایم برای باکس‌های هر کانال */
+  --bg:#e3d6b8;
+  --bg-grain:#d8c8a2;
+  --card:#eee3c8;
+  --card-hi:rgba(0,0,0,0.025);
+  --text:#2a2317;
+  --muted-text:#766d57;
+  --header:#ebdfc0;
+  --line:rgba(0,0,0,0.11);
+  --station-border: 1px solid rgba(0,0,0,0.09);
 }
 
-/* defaults */
 *{box-sizing:border-box}
+html{scrollbar-color: var(--accent) transparent;}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:8px;opacity:.6}
+::-webkit-scrollbar-track{background:transparent}
+
 body{
   margin:0;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto;
+  font-family:'Vazirmatn',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   direction:rtl;
-  background:var(--bg);
+  background:
+    radial-gradient(1100px 500px at 15% -10%, var(--accent-soft), transparent 60%),
+    var(--bg);
   color:var(--text);
+  transition:background-color .35s ease, color .35s ease;
+}
+
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
 }
 
 /* ===== TOP BAR ===== */
@@ -40,153 +80,324 @@ body{
   display:flex;
   align-items:center;
   justify-content:space-between;
-  padding:12px 16px;
+  gap:16px;
+  padding:14px 20px;
   background:var(--header);
-  border-bottom:1px solid var(--muted);
+  border-bottom:1px solid var(--line);
   position:sticky;
   top:0;
   z-index:1500;
+  backdrop-filter:blur(6px);
 }
-.title{font-size:20px}
 
-/* iOS switch */
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+
+.brand-mark{
+  width:42px;height:42px;
+  flex:none;
+  position:relative;
+}
+.brand-mark svg{width:100%;height:100%;overflow:visible}
+.brand-mark .needle{
+  transform-origin:16px 6px;
+  animation:sweep-in 1.6s cubic-bezier(.2,.9,.25,1) 1;
+}
+@keyframes sweep-in{
+  0%{transform:rotate(-46deg)}
+  55%{transform:rotate(18deg)}
+  100%{transform:rotate(0deg)}
+}
+
+.brand-text{min-width:0}
+.title{font-size:19px;font-weight:800;letter-spacing:.2px;line-height:1.25}
+.tagline{font-size:12.5px;color:var(--muted-text);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.topbar-controls{display:flex;align-items:center;gap:16px;flex:none}
+
+/* theme switch, restyled as a tuner rocker */
 .switch {
-  width:56px; height:26px;
+  width:54px; height:28px;
   border-radius:50px;
-  background:#555;
+  background:var(--card);
+  border:1px solid var(--line);
   position:relative;
   cursor:pointer;
-  transition:.25s;
+  transition:background-color .25s ease, border-color .25s;
   display:flex;
   align-items:center;
-  padding:0 6px;
+  padding:0 5px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.35);
 }
-
 .switch-icon {
-  font-size:14px;
-  color:white;
+  font-size:13px;
   pointer-events:none;
   transition:.25s;
   position:absolute;
-  left:8px;
+  left:7px;
+  filter:grayscale(.2);
 }
-
-.switch.on .switch-icon {
-  left:auto;
-  right:8px;
+.switch.on .switch-icon { left:auto; right:7px; }
+.switch-circle{
+  width:20px;height:20px;
+  border-radius:50%;
+  background:linear-gradient(180deg,#fff,#d8d8d8);
+  box-shadow:0 1px 3px rgba(0,0,0,.5), 0 0 0 3px rgba(0,0,0,.06) inset;
+  transition:transform .25s cubic-bezier(.4,1.4,.6,1);
+  position:relative;
+  z-index:1;
 }
-.switch.on{background:#fff}
-.switch.on .switch-circle{left:24px}
+.switch.on .switch-circle{transform:translateX(-26px); background:linear-gradient(180deg,var(--accent),var(--accent-dark))}
 
-/* Color picker */
-.color-picker{display:flex;gap:8px}
+/* color picker -> mini tuning knobs */
+.color-picker{display:flex;gap:9px;padding:5px 8px;background:var(--card);border:1px solid var(--line);border-radius:50px;box-shadow:inset 0 2px 4px rgba(0,0,0,.3)}
 .color-swatch{
-  width:22px;height:22px;
+  width:18px;height:18px;
   border-radius:50%;
   cursor:pointer;
-  border:2px solid rgba(255,255,255,0.1);
+  border:2px solid rgba(255,255,255,0.12);
+  transition:transform .18s ease, box-shadow .18s ease;
 }
+.color-swatch:hover{transform:scale(1.12)}
 .color-swatch.selected{
-  outline:2px solid #fff;
-  transform:scale(1.08);
+  box-shadow:0 0 0 2px var(--header), 0 0 0 4px currentColor;
+  transform:scale(1.1);
 }
 
 /* ===== CHANNEL LIST ===== */
 .cols{
   display:flex;
-  gap:18px;
-  padding:16px;
+  gap:20px;
+  padding:20px;
   max-width:1100px;
-  margin:12px auto 170px auto;
+  margin:14px auto 190px auto;
 }
-.col{flex:1}
+.col{flex:1;min-width:0}
 
 .category{
-  background:var(--card);
-  padding:10px 14px;
-  border-radius:8px;
-  margin-bottom:12px;
-  font-size:18px;
-  border:1px solid transparent;
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  padding:2px 4px 12px 4px;
+  margin-bottom:10px;
+  font-size:16px;
+  font-weight:700;
+  border-bottom:1px solid var(--line);
 }
+.category .count{font-size:12px;font-weight:500;color:var(--muted-text)}
 
 /* station list */
 .station-list{
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:8px;
 }
 
 .station{
-  background:var(--card);
+  --glow:0;
+  background:
+    linear-gradient(180deg, var(--card-hi), transparent 40%),
+    var(--card);
   border-radius:10px;
-  padding:10px;
+  padding:9px 12px 9px 9px;
   display:flex;
   justify-content:space-between;
-  cursor:pointer;
   align-items:center;
-  transition:.12s;
-  /* border in light theme applied via CSS variable */
-  border: var(--station-border, 0);
-}
-.station:hover{transform:translateY(-2px); box-shadow:0 6px 18px rgba(0,0,0,0.18)}
-.left{display:flex;align-items:center;gap:12px}
-.station img{
-  width:44px;height:44px;
-  border-radius:6px;
-  object-fit:cover;
-  background:rgba(0,0,0,0.06);
-}
-.name{font-weight:600;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-.station button{
-  background:var(--accent);
-  border:none;
-  padding:8px 10px;
-  border-radius:8px;
-  min-width:60px;
-  text-align:center;
   cursor:pointer;
-  color:#000;
-  transition:transform .08s;
+  gap:10px;
+  border:var(--station-border, 0);
+  border-inline-start:3px solid transparent;
+  box-shadow:0 1px 0 var(--card-hi) inset, 0 8px 18px -14px rgba(0,0,0,.6);
+  transition:transform .15s ease, border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+  position:relative;
 }
-.station button:active{ transform:scale(.98) }
+.station:hover{transform:translateY(-2px)}
+.station.playing{
+  border-inline-start-color:var(--accent);
+  box-shadow:0 0 0 1px var(--accent-soft), 0 10px 22px -14px rgba(0,0,0,.7);
+  animation:onair-pulse 2.6s ease-in-out infinite;
+}
+@keyframes onair-pulse{
+  0%,100%{box-shadow:0 0 0 1px var(--accent-soft), 0 10px 22px -14px rgba(0,0,0,.7)}
+  50%{box-shadow:0 0 0 4px var(--accent-soft), 0 10px 22px -14px rgba(0,0,0,.7)}
+}
+
+.left{display:flex;align-items:center;gap:11px;min-width:0}
+
+.preset{
+  flex:none;
+  font-size:11px;
+  font-weight:700;
+  color:var(--muted-text);
+  background:rgba(127,127,127,0.12);
+  border:1px solid var(--line);
+  border-radius:5px;
+  min-width:24px;
+  text-align:center;
+  padding:2px 3px;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.5px;
+}
+.station.playing .preset{color:var(--accent);border-color:var(--accent-soft);background:var(--accent-soft)}
+
+.station img{
+  width:42px;height:42px;
+  border-radius:7px;
+  object-fit:cover;
+  background:rgba(127,127,127,0.15);
+  flex:none;
+}
+.name{font-weight:600;font-size:14.5px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.play-btn{
+  background:transparent;
+  border:1.5px solid var(--line);
+  width:38px;height:38px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  color:var(--text);
+  flex:none;
+  transition:transform .1s ease, background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.play-btn svg{width:15px;height:15px}
+.play-btn:hover{border-color:var(--accent)}
+.play-btn:active{transform:scale(.92)}
+.station.playing .play-btn{background:var(--accent);border-color:var(--accent);color:#1a1204}
+
+@media(max-width:900px){
+  .cols{flex-direction:column;margin-bottom:245px;padding:14px}
+  .tagline{display:none}
+}
+@media(max-width:520px){
+  .name{max-width:150px}
+}
 
 /* ===== PLAYER ===== */
 .player-box{
   position:fixed;
   bottom:0;left:0;right:0;
-  padding:12px;
-  background:var(--card);
-  border-top:3px solid var(--accent);
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+  padding:14px 18px;
+  background:var(--header);
+  border-top:1px solid var(--line);
+  box-shadow:0 0 0 1px var(--line) inset, 0 -18px 40px -20px rgba(0,0,0,.7);
   z-index:2000;
-  box-shadow:0 -6px 25px rgba(0,0,0,0.6);
+}
+.player-box::before{
+  content:"";
+  position:absolute;
+  top:-1px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity:.9;
 }
 
-#eq{
-  width:100%;height:60px;
-  background:#000;border-radius:6px;
-}
-
-.player-controls{
+.player-inner{
+  max-width:1100px;
+  margin:0 auto;
   display:flex;
-  gap:12px;
   align-items:center;
-}
-.player-title{
-  flex:1;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  font-weight:600;
+  gap:18px;
 }
 
-@media(max-width:900px){
-  .cols{flex-direction:column;margin-bottom:230px}
-  #eq{height:45px}
+/* Big transport knob */
+.transport-btn{
+  flex:none;
+  width:52px;height:52px;
+  border-radius:50%;
+  border:none;
+  cursor:pointer;
+  background:radial-gradient(circle at 32% 28%, #33363f, #1c1e26 70%);
+  box-shadow:0 3px 0 rgba(0,0,0,.4), 0 6px 14px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted-text);
+  transition:transform .12s ease, color .2s ease, box-shadow .2s ease;
+}
+.transport-btn svg{width:18px;height:18px}
+.transport-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.4), 0 3px 8px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.06)}
+.transport-btn.is-playing{
+  color:#1a1204;
+  background:radial-gradient(circle at 32% 28%, var(--accent), var(--accent-dark) 75%);
+  box-shadow:0 3px 0 var(--accent-darker), 0 6px 18px var(--accent-soft), inset 0 0 0 1px rgba(255,255,255,.15);
+}
+
+.now-wrap{flex:none;display:flex;flex-direction:column;gap:3px;max-width:180px;min-width:0}
+.now-row{display:flex;align-items:center;gap:7px;min-width:0}
+.on-air-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--muted-text);
+  flex:none;
+}
+.now-wrap.playing .on-air-dot{
+  background:var(--danger);
+  box-shadow:0 0 8px var(--danger);
+  animation:blink 1.4s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+.player-title{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-weight:700;font-size:14px;
+}
+.player-status{font-size:11.5px;color:var(--muted-text)}
+
+.eq-wrap{
+  flex:1;
+  min-width:0;
+  height:56px;
+  border-radius:8px;
+  overflow:hidden;
+  background:var(--bg-grain);
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+#eq{width:100%;height:100%;display:block}
+
+.volume-wrap{flex:none;display:flex;align-items:center;gap:9px;width:170px}
+.mute-btn{
+  flex:none;
+  width:34px;height:34px;
+  border-radius:50%;
+  border:1px solid var(--line);
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .18s ease;
+}
+.mute-btn svg{width:16px;height:16px}
+.mute-btn:hover{border-color:var(--accent)}
+
+input[type="range"]#volume{
+  -webkit-appearance:none;appearance:none;
+  direction:ltr; /* keeps native thumb travel (min→max, left→right) in sync with our left-anchored fill, regardless of page RTL */
+  flex:1;
+  height:4px;
+  border-radius:3px;
+  background:linear-gradient(90deg, var(--accent) var(--vol,100%), var(--line) var(--vol,100%));
+  cursor:pointer;
+}
+input[type="range"]#volume::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:15px;height:15px;border-radius:50%;
+  background:linear-gradient(180deg,#fff,#d8d8d8);
+  box-shadow:0 1px 3px rgba(0,0,0,.5);
+  cursor:pointer;
+  margin-top:0;
+}
+input[type="range"]#volume::-moz-range-thumb{
+  width:15px;height:15px;border-radius:50%;border:none;
+  background:linear-gradient(180deg,#fff,#d8d8d8);
+  box-shadow:0 1px 3px rgba(0,0,0,.5);
+  cursor:pointer;
+}
+input[type="range"]#volume::-moz-range-track{height:4px;border-radius:3px;background:var(--line)}
+
+@media(max-width:760px){
+  .player-inner{gap:12px}
+  .now-wrap{max-width:110px}
+  .volume-wrap{width:110px}
+}
+@media(max-width:560px){
+  .now-wrap{display:none}
 }
 </style>
 </head>
@@ -195,20 +406,39 @@ body{
 
 <!-- TOP BAR -->
 <div class="topbar">
-  <div class="title">🎧 رادیو آنلاین</div>
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 40 40">
+        <rect x="2" y="15" width="36" height="22" rx="5" fill="none" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="12" cy="26" r="5.5" fill="none" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="12" cy="26" r="1.4" fill="var(--accent)"/>
+        <rect x="23" y="20" width="2.6" height="10" rx="1.3" fill="var(--accent)"/>
+        <rect x="28" y="17" width="2.6" height="13" rx="1.3" fill="var(--accent)"/>
+        <rect x="33" y="22" width="2.6" height="8" rx="1.3" fill="var(--accent)"/>
+        <g class="needle">
+          <line x1="16" y1="6" x2="16" y2="15" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="16" cy="6" r="2.4" fill="var(--accent)"/>
+        </g>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <div class="title">رادیو آنلاین</div>
+      <div class="tagline">پخش زنده ایستگاه‌های فارسی، ترکی و آذری</div>
+    </div>
+  </div>
 
-  <div style="display:flex;align-items:center;gap:14px">
-    <div id="themeSwitch" class="switch" title="تغییر حالت">
+  <div class="topbar-controls">
+    <div id="themeSwitch" class="switch" title="تغییر حالت" role="switch" aria-checked="true">
       <div class="switch-icon">🌙</div>
       <div class="switch-circle"></div>
     </div>
 
     <div class="color-picker" id="colorPicker" title="تغییر رنگ تم">
-      <div class="color-swatch selected" data-color="#00ffa6" style="background:#00ffa6"></div>
-      <div class="color-swatch" data-color="#00aaff" style="background:#00aaff"></div>
-      <div class="color-swatch" data-color="#ffcc00" style="background:#ffcc00"></div>
-      <div class="color-swatch" data-color="#ff4444" style="background:#ff4444"></div>
-      <div class="color-swatch" data-color="#c95bff" style="background:#c95bff"></div>
+      <div class="color-swatch selected" data-color="#f2a33d" style="background:#f2a33d;color:#f2a33d"></div>
+      <div class="color-swatch" data-color="#00aaff" style="background:#00aaff;color:#00aaff"></div>
+      <div class="color-swatch" data-color="#5be38a" style="background:#5be38a;color:#5be38a"></div>
+      <div class="color-swatch" data-color="#ff5577" style="background:#ff5577;color:#ff5577"></div>
+      <div class="color-swatch" data-color="#c95bff" style="background:#c95bff;color:#c95bff"></div>
     </div>
   </div>
 </div>
@@ -216,28 +446,39 @@ body{
 <!-- CHANNEL LIST -->
 <div class="cols">
   <div class="col">
-    <div class="category">📌 ترکی و آذری</div>
+    <div class="category">📌 ترکی و آذری <span class="count" id="count_tr"></span></div>
     <div class="station-list" id="cat_tr"></div>
   </div>
 
   <div class="col">
-    <div class="category">📌 فارسی</div>
+    <div class="category">📌 فارسی <span class="count" id="count_fa"></span></div>
     <div class="station-list" id="cat_fa"></div>
   </div>
 </div>
 
 <!-- PLAYER -->
 <div class="player-box">
-  <canvas id="eq" aria-hidden="true"></canvas>
+  <div class="player-inner">
+    <button class="transport-btn" id="stopBtn" title="توقف" aria-label="توقف پخش">
+      <svg id="transportIcon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>
+    </button>
 
-  <div class="player-controls">
-    <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
+    <div class="now-wrap" id="nowWrap">
+      <div class="now-row">
+        <span class="on-air-dot" aria-hidden="true"></span>
+        <div class="player-title" id="nowPlaying">هیچ رادیویی انتخاب نشده</div>
+      </div>
+      <div class="player-status" id="nowStatus">آماده پخش</div>
+    </div>
 
-    <label style="display:flex;align-items:center;gap:8px">حجم:
-      <input id="volume" type="range" min="0" max="1" value="1" step="0.01" style="width:140px">
-    </label>
+    <div class="eq-wrap"><canvas id="eq" aria-hidden="true"></canvas></div>
 
-    <button id="stopBtn">⏹ توقف</button>
+    <div class="volume-wrap">
+      <input id="volume" type="range" min="0" max="1" value="1" step="0.01" aria-label="حجم صدا">
+      <button class="mute-btn" id="muteBtn" title="بی‌صدا" aria-label="قطع/وصل صدا">
+        <svg id="muteIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 5V4L8 9H4z"></path></svg>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -315,7 +556,7 @@ const channelsFA = [
     url:"https://stream.zeno.fm/9svfnobkrxrvv",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_simorgh1.jpg"
   },
-  
+
   { name:"RADIO SIMORGH",
     url:"https://stream.zeno.fm/jl8n7thgcdftv",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_simorgh2.jpg"
@@ -364,27 +605,27 @@ const channelsFA = [
     url:"https://s2.cdn1.iranseda.ir/liveedge/radio-iran/playlist.m3u8",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_iran_irib.webp"
   },
-  
+
   { name:"Radio Javan IRIB",
     url:"https://s6.cdn3.iranseda.ir/liveedge/radio-javan/playlist.m3u8",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio-javan.jpg"
   },
-  
+
   { name:"Radio AVA IRIB",
     url:"https://s0.cdn1.iranseda.ir/liveedge/radio-avaa/playlist.m3u8",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_ava_irib.webp"
   },
-  
+
   { name:"Radio Payam IRIB",
     url:"https://s1.cdn3.iranseda.ir/liveedge/radio-payam/playlist.m3u8",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_payam_irib.webp"
   },
-  
+
   { name:"Radio Varzesh IRIB",
     url:"https://s0.cdn1.iranseda.ir/liveedge/radio-varzesh/playlist.m3u8",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_varzesh_irib.webp"
   },
-  
+
   { name:"Radio Shadi",
     url:"https://ice9.securenetsystems.net/SHADI",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Shadi.webp"
@@ -392,30 +633,42 @@ const channelsFA = [
 ];
 
 /* =========================
+   Icons (inline SVG strings)
+   ========================= */
+const ICON_PLAY = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5v14l12-7z"></path></svg>';
+const ICON_STOP = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>';
+
+/* =========================
    UI / List rendering
    ========================= */
 function createList(list, target){
   target.innerHTML = "";
-  list.forEach(ch=>{
+  list.forEach((ch, idx)=>{
     const id = "btn_" + ch.name.replace(/\s+/g,"_").replace(/[^\w\-]/g,"");
+    const preset = String(idx+1).padStart(2,"0");
     const el = document.createElement("div");
     el.className="station";
+    el.dataset.id = id;
 
     el.innerHTML = `
       <div class="left">
-        <img src="${ch.logo}" referrerpolicy="no-referrer" alt="${ch.name} logo">
+        <div class="preset">${preset}</div>
+        <img src="${ch.logo}" referrerpolicy="no-referrer" loading="lazy" alt="${ch.name} logo">
         <div class="name">${ch.name}</div>
       </div>
-      <button id="${id}">▶ پخش</button>
+      <button class="play-btn" id="${id}" aria-label="پخش ${ch.name}">${ICON_PLAY}</button>
     `;
 
     el.querySelector("button").onclick = ()=> toggleChannel(ch);
+    el.querySelector(".left").onclick = ()=> toggleChannel(ch);
     target.appendChild(el);
   });
 }
 
 createList(channelsTR, document.getElementById("cat_tr"));
 createList(channelsFA, document.getElementById("cat_fa"));
+document.getElementById("count_tr").textContent = channelsTR.length + " ایستگاه";
+document.getElementById("count_fa").textContent = channelsFA.length + " ایستگاه";
 
 /* ==================================== */
 /*          AUDIO + EQ ENGINE           */
@@ -458,17 +711,52 @@ document.addEventListener("click", ()=>{
 
 let currentChannel = null;
 
-function updateButtons(){
-  document.querySelectorAll(".station button").forEach(btn=>{
-    btn.innerText = "▶ پخش";
+const nowPlayingEl = document.getElementById("nowPlaying");
+const nowStatusEl = document.getElementById("nowStatus");
+const nowWrapEl = document.getElementById("nowWrap");
+const transportBtn = document.getElementById("stopBtn");
+const transportIconWrap = document.getElementById("transportIcon").parentElement;
+
+function updateButtons(isPlaying){
+  document.querySelectorAll(".station").forEach(st=>{
+    st.classList.remove("playing");
+    const btn = st.querySelector(".play-btn");
+    btn.innerHTML = ICON_PLAY;
+    btn.setAttribute("aria-label","پخش " + st.querySelector(".name").textContent);
   });
 
   if(currentChannel){
     const id = "btn_" + currentChannel.name.replace(/\s+/g,"_").replace(/[^\w\-]/g,"");
     const btn = document.getElementById(id);
-    if(btn) btn.innerText = "⏹ توقف";
+    const card = btn ? btn.closest(".station") : null;
+    if(card){
+      card.classList.add("playing");
+      btn.innerHTML = ICON_STOP;
+      btn.setAttribute("aria-label","توقف " + currentChannel.name);
+    }
   }
+
+  transportBtn.classList.toggle("is-playing", !!isPlaying);
+  transportIconWrap.innerHTML = isPlaying ? ICON_STOP : ICON_PLAY;
 }
+
+/* Status text is driven separately from real <audio> events (not from the
+   click itself), since connecting to a stream usually takes a second or
+   two — the on-air dot only blinks once sound is actually flowing. */
+function setStatus(text, isLive){
+  nowStatusEl.textContent = text;
+  nowWrapEl.classList.toggle("playing", !!isLive);
+}
+
+audio.addEventListener("playing", ()=>{
+  if(currentChannel) setStatus("در حال پخش", true);
+});
+audio.addEventListener("waiting", ()=>{
+  if(currentChannel) setStatus("در حال اتصال به رادیو…", false);
+});
+audio.addEventListener("error", ()=>{
+  if(currentChannel) setStatus("خطا در اتصال، دوباره امتحان کنید", false);
+});
 
 /* ============ M3U8 + toggleChannel ============ */
 
@@ -481,8 +769,9 @@ function toggleChannel(ch){
     audio.src = "";
     currentChannel = null;
     if(window.hls){ window.hls.destroy(); window.hls = null; }
-    document.getElementById("nowPlaying").innerText = "هیچ رادیویی انتخاب نشده";
-    updateButtons();
+    nowPlayingEl.textContent = "هیچ رادیویی انتخاب نشده";
+    updateButtons(false);
+    setStatus("آماده پخش", false);
     return;
   }
 
@@ -514,24 +803,57 @@ function toggleChannel(ch){
     try{ audio.src = ch.url; audio.play().catch(()=>{}); }catch(e){}
   }
 
-  document.getElementById("nowPlaying").innerText = ch.name;
-  updateButtons();
+  nowPlayingEl.textContent = ch.name;
+  updateButtons(true);
+  setStatus("در حال اتصال به رادیو…", false);
 }
 
-/* Stop button */
-document.getElementById("stopBtn").onclick = ()=>{
+/* Stop button (also acts as the main transport control) */
+transportBtn.onclick = ()=>{
   audio.pause();
   audio.src = "";
   currentChannel = null;
   if(window.hls){ window.hls.destroy(); window.hls = null; }
-  document.getElementById("nowPlaying").innerText = "هیچ رادیویی انتخاب نشده";
-  updateButtons();
+  nowPlayingEl.textContent = "هیچ رادیویی انتخاب نشده";
+  updateButtons(false);
+  setStatus("آماده پخش", false);
 };
 
-/* Volume */
-document.getElementById("volume").oninput = e=>{
-  audio.volume = e.target.value;
+
+/* Volume + mute */
+const volumeInput = document.getElementById("volume");
+const muteBtn = document.getElementById("muteBtn");
+const muteIconWrap = document.getElementById("muteIcon").parentElement;
+const ICON_VOL_FULL = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 5V4L8 9H4zm11.5 3a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 15.5 12z"></path></svg>';
+const ICON_VOL_MUTE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 9v6h4l5 5V4L8 9H4zm14.59 3 2.7-2.71-1.41-1.41L17.18 10.6l-2.7-2.71-1.41 1.41L15.77 12l-2.7 2.71 1.41 1.41 2.7-2.71 2.71 2.71 1.41-1.41z"></path></svg>';
+
+let lastVolume = 1;
+
+function setVolumeUI(v){
+  volumeInput.style.setProperty("--vol", (v*100) + "%");
+  muteIconWrap.innerHTML = v <= 0 ? ICON_VOL_MUTE : ICON_VOL_FULL;
+}
+
+volumeInput.oninput = e=>{
+  const v = parseFloat(e.target.value);
+  audio.volume = v;
+  if(v > 0) lastVolume = v;
+  setVolumeUI(v);
 };
+
+muteBtn.onclick = ()=>{
+  if(audio.volume > 0){
+    lastVolume = audio.volume;
+    audio.volume = 0;
+    volumeInput.value = 0;
+  } else {
+    audio.volume = lastVolume || 1;
+    volumeInput.value = audio.volume;
+  }
+  setVolumeUI(audio.volume);
+};
+
+setVolumeUI(1);
 
 /* ==================================== */
 /*            EQUALIZER DRAW            */
@@ -539,31 +861,84 @@ document.getElementById("volume").oninput = e=>{
 
 const canvas = document.getElementById("eq");
 const ctx = canvas.getContext("2d");
+const eqWrap = document.querySelector(".eq-wrap");
 
 function resizeEQ(){
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
+  const rect = eqWrap.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 resizeEQ();
 window.addEventListener("resize", resizeEQ);
 
+function roundedBar(x, yTop, w, h, r){
+  const rr = Math.min(r, w/2, h);
+  ctx.beginPath();
+  if(ctx.roundRect){
+    ctx.roundRect(x, yTop, w, h, [rr, rr, 0, 0]);
+  } else {
+    ctx.rect(x, yTop, w, h);
+  }
+  ctx.fill();
+}
+
+let idleT = 0;
+
+/* Mixes a hex color toward white so the equalizer's peak highlight always
+   stays in the same hue family as whichever accent color is selected,
+   instead of a fixed red that can clash with cooler accents. */
+function lightenHex(hex, amt){
+  hex = hex.replace("#","");
+  if(hex.length === 3) hex = hex.split("").map(c=>c+c).join("");
+  const num = parseInt(hex, 16);
+  let r = (num>>16)&255, g=(num>>8)&255, b=num&255;
+  r = Math.round(r + (255-r)*amt);
+  g = Math.round(g + (255-g)*amt);
+  b = Math.round(b + (255-b)*amt);
+  return "#" + [r,g,b].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+
 function drawEQ(){
   requestAnimationFrame(drawEQ);
-  if(!analyser) return;
+  const w = eqWrap.clientWidth, h = eqWrap.clientHeight;
+  if(!w || !h) return;
 
-  analyser.getByteFrequencyData(dataArray);
+  ctx.clearRect(0,0,w,h);
 
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#f2a33d";
+  const peakColor = lightenHex(accent, 0.55);
+  const isPlaying = analyser && currentChannel && !audio.paused;
 
-  const barWidth = canvas.width / dataArray.length;
-  for(let i=0;i<dataArray.length;i++){
-    const v = dataArray[i];
-    const barHeight = (v / 255) * canvas.height;
+  if(isPlaying){
+    analyser.getByteFrequencyData(dataArray);
+    const barCount = dataArray.length;
+    const gap = 2;
+    const barWidth = (w - gap*(barCount-1)) / barCount;
 
-    ctx.fillStyle = getComputedStyle(document.documentElement)
-      .getPropertyValue("--accent");
-    ctx.fillRect(i*barWidth, canvas.height-barHeight, barWidth-1, barHeight);
+    for(let i=0;i<barCount;i++){
+      const v = dataArray[i] / 255;
+      const barHeight = Math.max(2, v * h * 0.92);
+      const grad = ctx.createLinearGradient(0, h-barHeight, 0, h);
+      grad.addColorStop(0, v > 0.85 ? peakColor : accent);
+      grad.addColorStop(1, accent + "55");
+      ctx.fillStyle = grad;
+      roundedBar(i*(barWidth+gap), h-barHeight, barWidth, barHeight, 2);
+    }
+  } else {
+    // idle "waiting for signal" ambient sweep
+    idleT += 0.02;
+    ctx.strokeStyle = accent + "40";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    const steps = 64;
+    for(let i=0;i<=steps;i++){
+      const x = (i/steps) * w;
+      const y = h/2 + Math.sin(i*0.35 + idleT*3) * (h*0.14) * Math.sin(idleT + i*0.05);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
   }
 }
 drawEQ();
@@ -576,27 +951,9 @@ const switchEl = document.getElementById("themeSwitch");
 
 function setDarkMode(on){
   switchEl.classList.toggle("on", on);
+  switchEl.setAttribute("aria-checked", String(on));
   document.querySelector(".switch-icon").textContent = on ? "🌙" : "☀️";
-  // set data-theme on root so CSS can react (e.g. station border)
   document.documentElement.setAttribute("data-theme", on ? "dark" : "light");
-
-  if(on){
-    document.documentElement.style.setProperty("--bg", "#121212");
-    document.documentElement.style.setProperty("--card", "#1d1d1d");
-    document.documentElement.style.setProperty("--header", "#151515");
-    document.documentElement.style.setProperty("--text", "#eee");
-    document.documentElement.style.setProperty("--muted","rgba(255,255,255,0.06)");
-    document.documentElement.style.setProperty("--station-border","0");
-  } else {
-    // light (not too white)
-    document.documentElement.style.setProperty("--bg", "#e3f4ff");
-    document.documentElement.style.setProperty("--card", "#f0f9ff");
-    document.documentElement.style.setProperty("--header", "#ffffff");
-    document.documentElement.style.setProperty("--text", "#0b1220");
-    document.documentElement.style.setProperty("--muted","rgba(0,0,0,0.08)");
-    // add subtle black border for stations
-    document.documentElement.style.setProperty("--station-border","1px solid rgba(0,0,0,0.12)");
-  }
 }
 
 switchEl.onclick = ()=>{
@@ -608,18 +965,48 @@ switchEl.onclick = ()=>{
 setDarkMode(true);
 
 /* Accent color picker */
+
+/* Derives the soft glow / darker shades used around the app (toggle knob,
+   transport button, on-air glow) from whichever accent color is chosen,
+   so nothing is left with a leftover amber tint when the color changes. */
+function hexToRgbParts(hex){
+  hex = hex.replace("#","");
+  if(hex.length === 3) hex = hex.split("").map(c=>c+c).join("");
+  const num = parseInt(hex, 16);
+  return [(num>>16)&255, (num>>8)&255, num&255];
+}
+function darkenHex(hex, amt){
+  const [r,g,b] = hexToRgbParts(hex).map(c => Math.round(c*(1-amt)));
+  return "#" + [r,g,b].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+function applyAccent(hex){
+  const [r,g,b] = hexToRgbParts(hex);
+  const root = document.documentElement;
+  root.style.setProperty("--accent", hex);
+  root.style.setProperty("--accent-soft", `rgba(${r},${g},${b},0.16)`);
+  root.style.setProperty("--accent-dark", darkenHex(hex, 0.24));
+  root.style.setProperty("--accent-darker", darkenHex(hex, 0.5));
+}
+
+applyAccent("#f2a33d");
+
 document.querySelectorAll(".color-swatch").forEach(sw=>{
   sw.onclick = ()=>{
     document.querySelectorAll(".color-swatch").forEach(s=>s.classList.remove("selected"));
     sw.classList.add("selected");
-    const col = sw.dataset.color;
-    document.documentElement.style.setProperty("--accent", col);
-    // update player border color too
-    document.querySelectorAll(".player-box, .station button").forEach(el=>{
-      // no direct color change needed because CSS reads --accent; kept for completeness
-    });
+    applyAccent(sw.dataset.color);
   };
 });
+
+/* ==================================== */
+/*     PWA: installable as an app       */
+/* ==================================== */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("sw.js").catch(err=>console.log("SW registration failed:", err));
+  });
+}
+
 </script>
 </body>
 </html>
