@@ -539,6 +539,15 @@ input[type="range"]#volume::-moz-range-track{height:4px;border-radius:3px;backgr
 /*  (شامل نام، لینک پخش و لوگو) */
 /* ====================== */
 
+/* برخی سرورها (مثل iranseda/IRIB) هدر CORS نمی‌فرستن، برای همین hls.js
+   نمی‌تونه پلی‌لیست/سگمنت‌ها رو بخونه و پخش تو «در حال اتصال» گیر می‌کنه،
+   با اینکه خود لینک تو مرورگر باز میشه (چون باز کردن مستقیم لینک مشمول CORS نیست).
+   بعد از دیپلوی ورکر (فایل worker.js)، آدرس زیر رو با آدرس ورکر خودت عوض کن. */
+const PROXY_BASE = "https://m3u8.fnvm.workers.dev/m3u8-proxy?url=";
+function proxied(url){
+  return PROXY_BASE + encodeURIComponent(url);
+}
+
 const channelsTR = [
   { name:"Arabesk Efsane FM",
     url:"https://stream.zeno.fm/x5n4sfyy9nhvv",
@@ -638,7 +647,7 @@ const channelsFA = [
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_Arina.jpg"
   },
   { name:"Radio GLwiz",
-    url:"https://radio.fnvm.workers.dev/?url=https://shoutcast.glwiz.com/RadioGL.mp3",
+    url:"https://radio.fnvm.workers.dev/?url=https%3A%2F%2Fshoutcast.glwiz.com%2FRadioGL.mp3",
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/glwiz.png"
   },
   { name:"Radio Sarcheshmeh",
@@ -658,27 +667,27 @@ const channelsFA = [
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/Radio_AVA_Istanbul.webp"
   },
   { name:"Radio Iran IRIB",
-    url:"https://s2.cdn1.iranseda.ir/liveedge/radio-iran/playlist.m3u8",
+    url:proxied("https://s2.cdn1.iranseda.ir/liveedge/radio-iran/playlist.m3u8"),
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_iran_irib.webp"
   },
 
   { name:"Radio Javan IRIB",
-    url:"http://s1.cdn3.iranseda.ir:1935/liveedge/radio-javan/playlist.m3u8",
+    url:proxied("http://s1.cdn3.iranseda.ir:1935/liveedge/radio-javan/playlist.m3u8"),
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio-javan.jpg"
   },
 
   { name:"Radio AVA IRIB",
-    url:"http://s2.cdn3.iranseda.ir:1935/liveedge/radio-avaa/playlist.m3u8",
+    url:proxied("http://s2.cdn3.iranseda.ir:1935/liveedge/radio-avaa/playlist.m3u8"),
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_ava_irib.webp"
   },
 
   { name:"Radio Payam IRIB",
-    url:"http://s4.cdn3.iranseda.ir:1935/liveedge/radio-payam/playlist.m3u8",
+    url:proxied("http://s4.cdn3.iranseda.ir:1935/liveedge/radio-payam/playlist.m3u8"),
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_payam_irib.webp"
   },
 
   { name:"Radio Varzesh IRIB",
-    url:"http://s1.cdn3.iranseda.ir:1935/liveedge/radio-varzesh/playlist.m3u8",
+    url:proxied("http://s1.cdn3.iranseda.ir:1935/liveedge/radio-varzesh/playlist.m3u8"),
     logo:"https://raw.githubusercontent.com/hamedcode/radio/refs/heads/main/Logo/radio_varzesh_irib.webp"
   },
 
@@ -845,6 +854,14 @@ function toggleChannel(ch){
         // resume audio context if needed
         if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
         audio.play().catch(e=>console.log("play error hls:", e));
+      });
+      window.hls.on(Hls.Events.ERROR, (event, data)=>{
+        console.log("hls error:", data.type, data.details, data);
+        if(data.fatal && currentChannel === ch){
+          setStatus("خطا در اتصال، دوباره امتحان کنید", false);
+          window.hls.destroy();
+          window.hls = null;
+        }
       });
     } else {
       // fallback: مستقیم به audio.src
